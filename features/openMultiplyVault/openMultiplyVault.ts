@@ -11,7 +11,7 @@ import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
 import { SLIPPAGE } from 'helpers/multiply/calculations'
 import { curry } from 'lodash'
-import { combineLatest, iif, merge, Observable, of, Subject, throwError } from 'rxjs'
+import { combineLatest,  merge, Observable, of, Subject } from 'rxjs'
 import { first, map, scan, shareReplay, switchMap, switchMapTo, tap } from 'rxjs/operators'
 
 import {

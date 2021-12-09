@@ -31,7 +31,7 @@ import {
   WithdrawAndPaybackData,
 } from 'blockchain/calls/proxyActions'
 import { vatGem, vatIlk, vatUrns } from 'blockchain/calls/vat'
-import { createIlkData$, createIlkDataList$, createIlks$ } from 'blockchain/ilks'
+import { createIlkData$, createIlkDataList$, createIlks$, IlkData } from 'blockchain/ilks'
 import {
   createGasPrice$,
   createOraclePriceData$,
@@ -59,11 +59,11 @@ import { createManageMultiplyVault$ } from 'features/manageMultiplyVault/manageM
 import { createManageVault$ } from 'features/manageVault/manageVault'
 import { createOpenGuniVault$ } from 'features/openGuniVault/openGuniVault'
 import { createOpenMultiplyVault$ } from 'features/openMultiplyVault/openMultiplyVault'
-import { createOpenVault$ } from 'features/openVault/openVault'
+import { createOpenVault$, GenericOpenVaultContext } from 'features/openVault/openVault'
 import { createOpenVaultOverview$ } from 'features/openVaultOverview/openVaultData'
 import { createReclaimCollateral$ } from 'features/reclaimCollateral/reclaimCollateral'
 import { redirectState$ } from 'features/router/redirectState'
-import { createPriceInfo$ } from 'features/shared/priceInfo'
+import { createPriceInfo$, PriceInfo } from 'features/shared/priceInfo'
 import { checkVaultTypeUsingApi$, saveVaultUsingApi$ } from 'features/shared/vaultApi'
 import {
   checkAcceptanceFromApi$,
@@ -75,7 +75,15 @@ import { createVaultsOverview$ } from 'features/vaultsOverview/vaultsOverview'
 import { isEqual, mapValues, memoize } from 'lodash'
 import { curry } from 'ramda'
 import { combineLatest, iif, Observable, of, throwError } from 'rxjs'
-import { distinctUntilChanged, filter, map, mergeMap, shareReplay, switchMap } from 'rxjs/operators'
+import {
+  distinctUntilChanged,
+  filter,
+  first,
+  map,
+  mergeMap,
+  shareReplay,
+  switchMap,
+} from 'rxjs/operators'
 
 import { dogIlk } from '../blockchain/calls/dog'
 import {
@@ -313,6 +321,7 @@ export function setupAppContext() {
 
   // NEW STUFF
 
+  // returns a stream that when provided with an ilk triggers if it exists
   const guaranteedIlk = curry(
     (ilks$: Observable<string[]>, ilk: string): Observable<string> =>
       ilks$.pipe(
@@ -326,21 +335,78 @@ export function setupAppContext() {
       ),
   )
 
-  const openVault$ = memoize((ilk: string) =>
-    createOpenVault$(
+  // returns a stream that contains a context relevant to open vault streams
+  function genericOpenVaultContext$(
+    context$: Observable<ContextConnected>,
+    txHelpers$: Observable<TxHelpers>,
+    proxyAddress$: (address: string) => Observable<string | undefined>,
+    allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
+    priceInfo$: (token: string) => Observable<PriceInfo>,
+    balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
+    ilkData$: (ilk: string) => Observable<IlkData>,
+    ilk: string,
+  ): Observable<GenericOpenVaultContext> {
+    const ret = combineLatest(context$, txHelpers$, ilkData$(ilk)).pipe(
+      first(),
+      switchMap(([context, txHelpers, ilkData]) => {
+        const { token } = ilkData
+        const account = context.account
+        return combineLatest(
+          priceInfo$(token),
+          balanceInfo$(token, account),
+          proxyAddress$(account),
+        ).pipe(
+          first(),
+          switchMap(([priceInfo, balanceInfo, proxyAddress]) => {
+            const allowanceStream = proxyAddress
+              ? allowance$(token, account, proxyAddress)
+              : of(undefined)
+            return allowanceStream.pipe(
+              first(),
+              switchMap((allowance) => {
+                return of({
+                  proxyAddress,
+                  token,
+                  allowance,
+                  priceInfo,
+                  balanceInfo,
+                  ilkData,
+                  context,
+                  ilk,
+                  priceInfo$,
+                  balanceInfo$,
+                  proxyAddress$,
+                  ilkData$,
+                  txHelpers,
+                } as GenericOpenVaultContext)
+              }),
+            )
+          }),
+        )
+      }),
+    )
+    return ret
+  }
+
+  const openVault$ = memoize((ilk: string) => {
+    const openVaultContext = genericOpenVaultContext$(
       connectedContext$,
       txHelpers$,
       proxyAddress$,
       allowance$,
       priceInfo$,
       balanceInfo$,
+      ilkData$,
+      ilk,
+    )
+    return createOpenVault$(
+      openVaultContext,
       guaranteedIlk(ilks$),
       ilkData$,
-      ilkToToken$,
       addGasEstimation$,
       ilk,
-    ),
-  )
+    )
+  })
 
   const exchangeQuote$ = memoize(
     curry(createExchangeQuote$)(context$),

@@ -8,8 +8,13 @@ import { BalanceInfo, balanceInfoChange$ } from 'features/shared/balanceInfo'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
 import { curry } from 'lodash'
-import { combineLatest, iif, merge, Observable, of, Subject, throwError } from 'rxjs'
-import { first, map, mapTo, scan, shareReplay, switchMap, switchMapTo } from 'rxjs/operators'
+import { combineLatest,  merge, Observable,  Subject } from 'rxjs'
+import {
+  map,
+  scan,
+  shareReplay,
+  switchMap,
+} from 'rxjs/operators'
 
 import { createProxy } from '../proxy/createProxy'
 import { applyOpenVaultAllowance, OpenVaultAllowanceChange } from './openVaultAllowances'
@@ -267,96 +272,97 @@ export const defaultMutableOpenVaultState: MutableOpenVaultState = {
   allowanceAmount: maxUint256,
 }
 
+export type GenericOpenVaultContext = {
+  proxyAddress: string | undefined
+  token: string
+  allowance: BigNumber
+  priceInfo: PriceInfo
+  balanceInfo: BalanceInfo
+  ilkData: IlkData
+  context: ContextConnected
+  ilk: string
+  priceInfo$: (token: string) => Observable<PriceInfo>
+  balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>
+  proxyAddress$: (address: string) => Observable<string | undefined>
+  ilkData$: (ilk: string) => Observable<IlkData>
+  txHelpers: TxHelpers
+}
+
 export function createOpenVault$(
-  context$: Observable<ContextConnected>,
-  txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
-  allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
-  priceInfo$: (token: string) => Observable<PriceInfo>,
-  balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
+  genericOpenVaultContext$: Observable<GenericOpenVaultContext>,
   guaranteedIlk: (ilk: string) => Observable<string>,
   ilkData$: (ilk: string) => Observable<IlkData>,
-  ilkToToken$: Observable<(ilk: string) => string>,
   addGasEstimation$: AddGasEstimationFunction,
   ilk: string,
 ): Observable<OpenVaultState> {
-  return guaranteedIlk(ilk).pipe(
-    switchMapTo(
-      combineLatest(context$, txHelpers$, ilkData$(ilk)).pipe(
-        first(),
-        switchMap(([context, txHelpers, ilkData]) => {
-          const { token } = ilkData
-          const account = context.account
-          return combineLatest(
-            priceInfo$(token),
-            balanceInfo$(token, account),
-            ilkData$(ilk),
-            proxyAddress$(account),
-          ).pipe(
-            first(),
-            switchMap(([priceInfo, balanceInfo, ilkData, proxyAddress]) =>
-              ((proxyAddress && allowance$(token, account, proxyAddress)) || of(undefined)).pipe(
-                first(),
-                switchMap((allowance) => {
-                  const change$ = new Subject<OpenVaultChange>()
+  return combineLatest(guaranteedIlk(ilk), genericOpenVaultContext$).pipe(
+    switchMap(([ilk, openVaultContext]) => {
+      const {
+        proxyAddress,
+        token,
+        allowance,
+        priceInfo,
+        balanceInfo,
+        ilkData,
+        context,
+        priceInfo$,
+        balanceInfo$,
+        proxyAddress$,
+        txHelpers,
+      } = openVaultContext
+      const change$ = new Subject<OpenVaultChange>()
 
-                  function change(ch: OpenVaultChange) {
-                    change$.next(ch)
-                  }
+      function change(ch: OpenVaultChange) {
+        change$.next(ch)
+      }
 
-                  // NOTE: Not to be used in production/dev, test only
-                  function injectStateOverride(stateToOverride: Partial<MutableOpenVaultState>) {
-                    return change$.next({ kind: 'injectStateOverride', stateToOverride })
-                  }
+      // NOTE: Not to be used in production/dev, test only
+      function injectStateOverride(stateToOverride: Partial<MutableOpenVaultState>) {
+        return change$.next({ kind: 'injectStateOverride', stateToOverride })
+      }
 
-                  const totalSteps = calculateInitialTotalSteps(proxyAddress, token, allowance)
+      const totalSteps = calculateInitialTotalSteps(proxyAddress, token, allowance)
 
-                  const initialState: OpenVaultState = {
-                    ...defaultMutableOpenVaultState,
-                    ...defaultOpenVaultStateCalculations,
-                    ...defaultOpenVaultConditions,
-                    priceInfo,
-                    balanceInfo,
-                    ilkData,
-                    token,
-                    account,
-                    ilk,
-                    proxyAddress,
-                    allowance,
-                    safeConfirmations: context.safeConfirmations,
-                    etherscan: context.etherscan.url,
-                    errorMessages: [],
-                    warningMessages: [],
-                    summary: defaultOpenVaultSummary,
-                    totalSteps,
-                    currentStep: 1,
-                    clear: () => change({ kind: 'clear' }),
-                    gasEstimationStatus: GasEstimationStatus.unset,
-                    injectStateOverride,
-                  }
+      const initialState: OpenVaultState = {
+        ...defaultMutableOpenVaultState,
+        ...defaultOpenVaultStateCalculations,
+        ...defaultOpenVaultConditions,
+        priceInfo,
+        balanceInfo,
+        ilkData,
+        token,
+        account: context.account,
+        ilk,
+        proxyAddress,
+        allowance,
+        safeConfirmations: context.safeConfirmations,
+        etherscan: context.etherscan.url,
+        errorMessages: [],
+        warningMessages: [],
+        summary: defaultOpenVaultSummary,
+        totalSteps,
+        currentStep: 1,
+        clear: () => change({ kind: 'clear' }),
+        gasEstimationStatus: GasEstimationStatus.unset,
+        injectStateOverride,
+      }
 
-                  const environmentChanges$ = merge(
-                    priceInfoChange$(priceInfo$, token),
-                    balanceInfoChange$(balanceInfo$, token, account),
-                    createIlkDataChange$(ilkData$, ilk),
-                  )
+      const environmentChanges$ = merge(
+        priceInfoChange$(priceInfo$, token),
+        balanceInfoChange$(balanceInfo$, token, context.account),
+        createIlkDataChange$(ilkData$, ilk),
+      )
 
-                  const connectedProxyAddress$ = proxyAddress$(account)
+      const connectedProxyAddress$ = proxyAddress$(context.account)
 
-                  return merge(change$, environmentChanges$).pipe(
-                    scan(apply, initialState),
-                    map(validateErrors),
-                    map(validateWarnings),
-                    switchMap(curry(applyEstimateGas)(addGasEstimation$)),
-                    map(curry(addTransitions)(txHelpers, connectedProxyAddress$, change)),
-                  )
-                }),
-              ),
-            ),
-          )
-        }),
-      ),
-    ),
+      return merge(change$, environmentChanges$).pipe(
+        scan(apply, initialState),
+        map(validateErrors),
+        map(validateWarnings),
+        switchMap(curry(applyEstimateGas)(addGasEstimation$)),
+        map(curry(addTransitions)(txHelpers, connectedProxyAddress$, change)),
+      )
+    }),
     shareReplay(1),
   )
 }
