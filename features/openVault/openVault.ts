@@ -282,10 +282,11 @@ export function createOpenVault$(
 ): Observable<OpenVaultState> {
   return guaranteedIlk(ilk).pipe(
     switchMapTo(
-      combineLatest(context$, txHelpers$, ilkToToken$).pipe(
-        switchMap(([context, txHelpers, ilkToToken]) => {
+      combineLatest(context$, txHelpers$, ilkData$(ilk)).pipe(
+        first(),
+        switchMap(([context, txHelpers, ilkData]) => {
+          const { token } = ilkData
           const account = context.account
-          const token = ilkToToken(ilk)
           return combineLatest(
             priceInfo$(token),
             balanceInfo$(token, account),
