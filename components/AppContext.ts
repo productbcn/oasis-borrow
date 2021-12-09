@@ -74,7 +74,7 @@ import { createVaultMultiplyHistory$ } from 'features/vaultHistory/vaultMultiply
 import { createVaultsOverview$ } from 'features/vaultsOverview/vaultsOverview'
 import { isEqual, mapValues, memoize } from 'lodash'
 import { curry } from 'ramda'
-import { combineLatest, Observable, of } from 'rxjs'
+import { combineLatest, iif, Observable, of, throwError } from 'rxjs'
 import { distinctUntilChanged, filter, map, mergeMap, shareReplay, switchMap } from 'rxjs/operators'
 
 import { dogIlk } from '../blockchain/calls/dog'
@@ -311,6 +311,21 @@ export function setupAppContext() {
     account: string | undefined,
   ) => Observable<BalanceInfo>
 
+  // NEW STUFF
+
+  const guaranteedIlk = curry(
+    (ilks$: Observable<string[]>, ilk: string): Observable<string> =>
+      ilks$.pipe(
+        switchMap((ilks) =>
+          iif(
+            () => !ilks.some((i) => i === ilk),
+            throwError(new Error(`Ilk ${ilk} does not exist`)),
+            of(ilk),
+          ),
+        ),
+      ),
+  )
+
   const openVault$ = memoize((ilk: string) =>
     createOpenVault$(
       connectedContext$,
@@ -319,7 +334,7 @@ export function setupAppContext() {
       allowance$,
       priceInfo$,
       balanceInfo$,
-      ilks$,
+      guaranteedIlk(ilks$),
       ilkData$,
       ilkToToken$,
       addGasEstimation$,
@@ -347,7 +362,7 @@ export function setupAppContext() {
       allowance$,
       priceInfo$,
       balanceInfo$,
-      ilks$,
+      guaranteedIlk(ilks$),
       ilkData$,
       exchangeQuote$,
       addGasEstimation$,
