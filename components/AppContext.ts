@@ -344,46 +344,51 @@ export function setupAppContext() {
     priceInfo$: (token: string) => Observable<PriceInfo>,
     balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
     ilkData$: (ilk: string) => Observable<IlkData>,
+    guaranteedIlk$: (ilk: string) => Observable<string>,
     ilk: string,
   ): Observable<GenericOpenVaultContext> {
-    const ret = combineLatest(context$, txHelpers$, ilkData$(ilk)).pipe(
-      first(),
-      switchMap(([context, txHelpers, ilkData]) => {
-        const { token } = ilkData
-        const account = context.account
-        return combineLatest(
-          priceInfo$(token),
-          balanceInfo$(token, account),
-          proxyAddress$(account),
-        ).pipe(
+    const ret = guaranteedIlk$(ilk).pipe(
+      switchMap((ilk) =>
+        combineLatest(context$, txHelpers$, ilkData$(ilk)).pipe(
           first(),
-          switchMap(([priceInfo, balanceInfo, proxyAddress]) => {
-            const allowanceStream = proxyAddress
-              ? allowance$(token, account, proxyAddress)
-              : of(undefined)
-            return allowanceStream.pipe(
+          switchMap(([context, txHelpers, ilkData]) => {
+            const { token } = ilkData
+            const account = context.account
+            return combineLatest(
+              priceInfo$(token),
+              balanceInfo$(token, account),
+              proxyAddress$(account),
+            ).pipe(
               first(),
-              switchMap((allowance) => {
-                return of({
-                  proxyAddress,
-                  token,
-                  allowance,
-                  priceInfo,
-                  balanceInfo,
-                  ilkData,
-                  context,
-                  ilk,
-                  priceInfo$,
-                  balanceInfo$,
-                  proxyAddress$,
-                  ilkData$,
-                  txHelpers,
-                } as GenericOpenVaultContext)
+              switchMap(([priceInfo, balanceInfo, proxyAddress]) => {
+                const allowanceStream = proxyAddress
+                  ? allowance$(token, account, proxyAddress)
+                  : of(undefined)
+                return allowanceStream.pipe(
+                  first(),
+                  switchMap((allowance) => {
+                    return of({
+                      proxyAddress,
+                      token,
+                      allowance,
+                      priceInfo,
+                      balanceInfo,
+                      ilkData,
+                      context,
+                      ilk,
+                      priceInfo$,
+                      balanceInfo$,
+                      proxyAddress$,
+                      ilkData$,
+                      txHelpers,
+                    } as GenericOpenVaultContext)
+                  }),
+                )
               }),
             )
           }),
-        )
-      }),
+        ),
+      ),
     )
     return ret
   }
@@ -397,15 +402,10 @@ export function setupAppContext() {
       priceInfo$,
       balanceInfo$,
       ilkData$,
-      ilk,
-    )
-    return createOpenVault$(
-      openVaultContext,
       guaranteedIlk(ilks$),
-      ilkData$,
-      addGasEstimation$,
       ilk,
     )
+    return createOpenVault$(openVaultContext, ilkData$, addGasEstimation$)
   })
 
   const exchangeQuote$ = memoize(

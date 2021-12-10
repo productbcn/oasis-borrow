@@ -8,13 +8,8 @@ import { BalanceInfo, balanceInfoChange$ } from 'features/shared/balanceInfo'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
 import { curry } from 'lodash'
-import { combineLatest,  merge, Observable,  Subject } from 'rxjs'
-import {
-  map,
-  scan,
-  shareReplay,
-  switchMap,
-} from 'rxjs/operators'
+import { combineLatest, merge, Observable, Subject } from 'rxjs'
+import { map, scan, shareReplay, switchMap } from 'rxjs/operators'
 
 import { createProxy } from '../proxy/createProxy'
 import { applyOpenVaultAllowance, OpenVaultAllowanceChange } from './openVaultAllowances'
@@ -290,13 +285,11 @@ export type GenericOpenVaultContext = {
 
 export function createOpenVault$(
   genericOpenVaultContext$: Observable<GenericOpenVaultContext>,
-  guaranteedIlk: (ilk: string) => Observable<string>,
   ilkData$: (ilk: string) => Observable<IlkData>,
   addGasEstimation$: AddGasEstimationFunction,
-  ilk: string,
 ): Observable<OpenVaultState> {
-  return combineLatest(guaranteedIlk(ilk), genericOpenVaultContext$).pipe(
-    switchMap(([ilk, openVaultContext]) => {
+  return genericOpenVaultContext$.pipe(
+    switchMap((openVaultContext) => {
       const {
         proxyAddress,
         token,
@@ -309,6 +302,7 @@ export function createOpenVault$(
         balanceInfo$,
         proxyAddress$,
         txHelpers,
+        ilk,
       } = openVaultContext
       const change$ = new Subject<OpenVaultChange>()
 
