@@ -5,6 +5,7 @@ import { ContextConnected } from 'blockchain/network'
 import { AddGasEstimationFunction, TxHelpers } from 'components/AppContext'
 import { setAllowance } from 'features/allowance/setAllowance'
 import { BalanceInfo, balanceInfoChange$ } from 'features/shared/balanceInfo'
+import { GenericOpenVaultContext } from 'features/shared/GenericOpenVaultContext'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
 import { curry } from 'lodash'
@@ -265,22 +266,6 @@ export const defaultMutableOpenVaultState: MutableOpenVaultState = {
   showGenerateOption: false,
   selectedAllowanceRadio: 'unlimited' as 'unlimited',
   allowanceAmount: maxUint256,
-}
-
-export type GenericOpenVaultContext = {
-  proxyAddress: string | undefined
-  token: string
-  allowance: BigNumber
-  priceInfo: PriceInfo
-  balanceInfo: BalanceInfo
-  ilkData: IlkData
-  context: ContextConnected
-  ilk: string
-  priceInfo$: (token: string) => Observable<PriceInfo>
-  balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>
-  proxyAddress$: (address: string) => Observable<string | undefined>
-  ilkData$: (ilk: string) => Observable<IlkData>
-  txHelpers: TxHelpers
 }
 
 export function createOpenVault$(

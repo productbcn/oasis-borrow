@@ -59,10 +59,11 @@ import { createManageMultiplyVault$ } from 'features/manageMultiplyVault/manageM
 import { createManageVault$ } from 'features/manageVault/manageVault'
 import { createOpenGuniVault$ } from 'features/openGuniVault/openGuniVault'
 import { createOpenMultiplyVault$ } from 'features/openMultiplyVault/openMultiplyVault'
-import { createOpenVault$, GenericOpenVaultContext } from 'features/openVault/openVault'
+import { createOpenVault$ } from 'features/openVault/openVault'
 import { createOpenVaultOverview$ } from 'features/openVaultOverview/openVaultData'
 import { createReclaimCollateral$ } from 'features/reclaimCollateral/reclaimCollateral'
 import { redirectState$ } from 'features/router/redirectState'
+import { GenericOpenVaultContext } from 'features/shared/GenericOpenVaultContext'
 import { createPriceInfo$, PriceInfo } from 'features/shared/priceInfo'
 import { checkVaultTypeUsingApi$, saveVaultUsingApi$ } from 'features/shared/vaultApi'
 import {
