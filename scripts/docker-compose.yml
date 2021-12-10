@@ -7,10 +7,10 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
       - POSTGRES_HOST=localhost
-      - POSTGRES_PORT=5432
+      - POSTGRES_PORT=5433
       - POSTGRES_DB=db
     ports:
-      - '5432:5432'
+      - '5433:5432'
   localnode:
     image: oasisdexorg/multiply-proxy-actions:latest
     container_name: multiply-proxy-actions
@@ -34,7 +34,14 @@ services:
       - postgres
       - localnode
     command:
-      ['./scripts/wait-for-it.sh', 'postgres-oasis-borrow:5432', '--', 'npm', 'run', 'start:prod']
+      [
+        './scripts/wait-for-it.sh',
+        'postgres-oasis-borrow:5432',
+        '--',
+        'npm',
+        'run',
+        'start:prod'
+      ]
     environment:
       - CHALLENGE_JWT_SECRET=${CHALLENGE_JWT_SECRET}
       - USER_JWT_SECRET=${USER_JWT_SECRET}

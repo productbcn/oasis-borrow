@@ -50,6 +50,7 @@ import { createAccountData } from 'features/account/AccountData'
 import { createVaultsBanners$ } from 'features/banners/vaultsBanners'
 import { createCollateralPrices$ } from 'features/collateralPrices/collateralPrices'
 import { currentContent } from 'features/content'
+import { createEnsName$ } from 'features/ens/ens'
 import { createExchangeQuote$ } from 'features/exchange/exchange'
 import { createGeneralManageVault$ } from 'features/generalManageVault/generalManageVault'
 import { createIlkDataListWithBalances$ } from 'features/ilks/ilksWithBalances'
@@ -177,6 +178,10 @@ export function setupAppContext() {
   const context$ = createContext$(web3ContextConnected$)
 
   const connectedContext$ = createContextConnected$(context$)
+
+  const ensName$ = createEnsName$(connectedContext$)
+  console.log('ensName$', ensName$)
+  ensName$.subscribe(console.log)
 
   combineLatest(account$, connectedContext$)
     .pipe(
