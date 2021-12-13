@@ -1,6 +1,6 @@
-import { ContextConnected } from '@oasisdex/transactions/lib/src/callHelpersContextParametrized'
 import BigNumber from 'bignumber.js'
 import { IlkData } from 'blockchain/ilks'
+import { ContextConnected } from 'blockchain/network'
 import { TxHelpers } from 'components/AppContext'
 import { Observable } from 'rxjs'
 import { BalanceInfo } from './balanceInfo'

@@ -395,7 +395,7 @@ export function setupAppContext() {
   }
 
   const openVault$ = memoize((ilk: string) => {
-    const openVaultContext = genericOpenVaultContext$(
+    const openVaultContext$ = genericOpenVaultContext$(
       connectedContext$,
       txHelpers$,
       proxyAddress$,
@@ -406,7 +406,7 @@ export function setupAppContext() {
       guaranteedIlk(ilks$),
       ilk,
     )
-    return createOpenVault$(openVaultContext, ilkData$, addGasEstimation$)
+    return createOpenVault$(openVaultContext$, ilkData$, addGasEstimation$)
   })
 
   const exchangeQuote$ = memoize(
@@ -415,21 +415,21 @@ export function setupAppContext() {
       `${token}_${slippage.toString()}_${amount.toString()}_${action}_${exchangeType}`,
   )
 
-  const openMultiplyVault$ = memoize((ilk: string) =>
-    createOpenMultiplyVault$(
+  const openMultiplyVault$ = memoize((ilk: string) => {
+    const openVaultContext$ = genericOpenVaultContext$(
       connectedContext$,
       txHelpers$,
       proxyAddress$,
       allowance$,
       priceInfo$,
       balanceInfo$,
-      guaranteedIlk(ilks$),
       ilkData$,
-      exchangeQuote$,
-      addGasEstimation$,
+      guaranteedIlk(ilks$),
       ilk,
-    ),
-  )
+    )
+
+    return createOpenMultiplyVault$(openVaultContext$, ilkData$, exchangeQuote$, addGasEstimation$)
+  })
 
   const token1Balance$ = observe(onEveryBlock$, context$, getToken1Balance)
   const getGuniMintAmount$ = observe(onEveryBlock$, context$, getGuniMintAmount)
