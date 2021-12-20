@@ -206,18 +206,17 @@ const goerli: NetworkConfig = {
   dssProxyActions: contractDesc(dssProxyActions, goerliAddresses.PROXY_ACTIONS),
   // Currently this is not supported on Goerli - no deployed contract
   dssMultiplyProxyActions: contractDesc(
-    dssMultiplyProxyActions,
-    getConfig()?.publicRuntimeConfig?.multiplyProxyActions || '',
+    dssMultiplyProxyActions,'0x216F1d572782a44a0dF6653017B1354112eA5590',
   ),
   guniProxyActions: contractDesc(guniProxyActions, '0x'), // TODO: add address
   guniResolver: '0x',
   guniRouter: '0x',
-  automationBot: contractDesc(automationBot, '0x62fab0FfcC439c75a7d31F94f5B34bE31F3e08E7'),
-  serviceRegistry: '0x2a49Eae5CCa3f050eBEC729Cf90CC910fADAf7A2', // TODO: add address
+  automationBot: contractDesc(automationBot, '0x68Ff2d96EDD4aFfcE9CBE82BF55F0B70acb483Ea'),
+  serviceRegistry: '0x9b4Ae7b164d195df9C4Da5d08Be88b2848b2EaDA', // TODO: add address
   // Currently this is not supported on Goerli - no deployed contract
-  defaultExchange: contractDesc(exchange, "0x21261F47b3CFEa595c80bdc016AD0fea0Ef086eA"),
-  lowerFeesExchange: contractDesc(exchange, "0x21261F47b3CFEa595c80bdc016AD0fea0Ef086eA"),
-  noFeesExchange: contractDesc(exchange, "0x21261F47b3CFEa595c80bdc016AD0fea0Ef086eA"),
+  defaultExchange: contractDesc(exchange, "0xde21e8bb2aac2923c13d957745e96c37a223e2e6"),
+  lowerFeesExchange: contractDesc(exchange, "0xde21e8bb2aac2923c13d957745e96c37a223e2e6"),
+  noFeesExchange: contractDesc(exchange, "0xde21e8bb2aac2923c13d957745e96c37a223e2e6"),
   // Currently this is not supported on Goerli - no deployed contract
   fmm: '0x1EB4CF3A948E7D72A198fe073cCb8C7a948cD853',
   etherscan: {
