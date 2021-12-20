@@ -60,6 +60,13 @@ const protoMain = {
     WETH: contractDesc(eth, mainnetAddresses['ETH']),
     DAI: contractDesc(erc20, mainnetAddresses['MCD_DAI']),
   } as Dictionary<ContractDesc>,
+  tokensMainnet:{
+    ...getCollateralTokens(mainnetAddresses),
+    GUNIV3DAIUSDC1: contractDesc(guniToken, mainnetAddresses['GUNIV3DAIUSDC1']),
+    GUNIV3DAIUSDC2: contractDesc(guniToken, mainnetAddresses['GUNIV3DAIUSDC2']),
+    WETH: contractDesc(eth, mainnetAddresses['ETH']),
+    DAI: contractDesc(erc20, mainnetAddresses['MCD_DAI']),
+  },
   joins: {
     ...getCollateralJoinContracts(mainnetAddresses),
   },
@@ -127,6 +134,7 @@ const kovan: NetworkConfig = {
     DAI: contractDesc(erc20, kovanAddresses['MCD_DAI']),
     USDC: contractDesc(erc20, '0x198419c5c340e8De47ce4C0E4711A03664d42CB2'),
   },
+  tokensMainnet: protoMain.tokensMainnet,
   joins: {
     ...getCollateralJoinContracts(kovanAddresses),
   },
@@ -187,6 +195,7 @@ const goerli: NetworkConfig = {
     WETH: contractDesc(eth, goerliAddresses.ETH),
     DAI: contractDesc(erc20, goerliAddresses.MCD_DAI),
   },
+  tokensMainnet: protoMain.tokensMainnet,
   joins: {
     ...getCollateralJoinContracts(goerliAddresses),
   },
