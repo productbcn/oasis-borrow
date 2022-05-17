@@ -20,3 +20,19 @@ export function useUIChanges<T extends SupportedUIChangeType>(topic: string): T[
 
   return [lastUIState]
 }
+
+export function useUIChangesHandler<T extends SupportedUIChangeType>(topic: string, handler : (val:T)=>void) : void {
+  const { uiChanges } = useAppContext()
+
+  useEffect(() => {
+    const uiChanges$ = uiChanges.subscribe<T>(topic)
+
+    const subscription = uiChanges$.subscribe((value) => {
+      handler(value);
+    })
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
+}
+
