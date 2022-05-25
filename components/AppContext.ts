@@ -1,5 +1,5 @@
 import { createSend, SendFunction } from '@oasisdex/transactions'
-import { createWeb3Context$ } from '@oasisdex/web3-context'
+import { createWeb3Context$, Web3Context } from '@oasisdex/web3-context'
 import { trackingEvents } from 'analytics/analytics'
 import { mixpanelIdentify } from 'analytics/mixpanel'
 import { BigNumber } from 'bignumber.js'
@@ -37,6 +37,7 @@ import {
 } from 'blockchain/calls/proxyActions/proxyActions'
 import { vatGem, vatIlk, vatUrns } from 'blockchain/calls/vat'
 import { createVaultResolver$ } from 'blockchain/calls/vaultResolver'
+import { STREAMS as ROOT_STREAMS } from 'blockchain/di/constants/identifiers'
 import { resolveENSName$ } from 'blockchain/ens'
 import { createGetRegistryCdps$ } from 'blockchain/getRegistryCdps'
 import { createIlkData$, createIlkDataList$, createIlks$ } from 'blockchain/ilks'
@@ -178,9 +179,11 @@ import { createCheckOasisCDPType$ } from '../features/shared/checkOasisCDPType'
 import { jwtAuthSetupToken$ } from '../features/termsOfService/jwt'
 import { createTermsAcceptance$ } from '../features/termsOfService/termsAcceptance'
 import { createVaultHistory$ } from '../features/vaultHistory/vaultHistory'
+import { bindDependencies } from '../helpers/di/bindDependencies'
 import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
+import { IContext } from 'interfaces/IContext'
 
 export type TxData =
   | OpenData
@@ -335,13 +338,9 @@ function initializeUIChanges() {
   return uiChangesSubject
 }
 
-export function setupAppContext() {
-  const chainIdToRpcUrl = mapValues(networksById, (network) => network.infuraUrl)
-  const chainIdToDAIContractDesc = mapValues(networksById, (network) => network.tokens.DAI)
-  const [web3Context$, setupWeb3Context$] = createWeb3Context$(
-    chainIdToRpcUrl,
-    chainIdToDAIContractDesc,
-  )
+function _setupAppContext(context: IContext<Observable<Web3Context>>) {
+  const web3Context$ = context.create()
+  const setupWeb3Context$ = context.connect
 
   const account$ = createAccount$(web3Context$)
   const initializedAccount$ = createInitializedAccount$(account$)
@@ -868,6 +867,13 @@ export function setupAppContext() {
     bonus$,
   }
 }
+
+type TReturnAppContext = ReturnType<typeof _setupAppContext>
+
+export const setupAppContext = bindDependencies<
+  IContext<Observable<Web3Context>>,
+  TReturnAppContext
+>(_setupAppContext, [ROOT_STREAMS.WEB3_CONTEXT])
 
 export function bigNumberTostring(v: BigNumber): string {
   return v.toString()

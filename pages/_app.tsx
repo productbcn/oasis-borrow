@@ -1,3 +1,5 @@
+import 'reflect-metadata'
+
 import { CacheProvider, Global } from '@emotion/core'
 // @ts-ignore
 import { MDXProvider } from '@mdx-js/react'
@@ -14,6 +16,7 @@ import { SharedUIProvider } from 'components/SharedUIProvider'
 import { cache } from 'emotion'
 import { ModalProvider } from 'helpers/modalHook'
 import { staticFilesRuntimeUrl } from 'helpers/staticPaths'
+import { Provider } from 'inversify-react'
 import { appWithTranslation } from 'next-i18next'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -31,6 +34,7 @@ import { mixpanelInit } from '../analytics/mixpanel'
 import { loadFeatureToggles } from '../helpers/useFeatureToggle'
 import { useLocalStorage } from '../helpers/useLocalStorage'
 import nextI18NextConfig from '../next-i18next.config.js'
+import { containers } from 'config/di'
 
 function getLibrary(provider: any, connector: AbstractConnector | undefined): Web3 {
   const chainIdPromise = connector!.getChainId()
@@ -159,20 +163,22 @@ function App({ Component, pageProps }: AppProps & CustomAppProps) {
           <MDXProvider components={{ ...components, a: CustomMDXLink }}>
             <Global styles={globalStyles} />
             <Web3ReactProvider {...{ getLibrary }}>
-              <AppContextProvider>
-                <ModalProvider>
-                  <HeadTags />
-                  {seoTags}
-                  <SetupWeb3Context>
-                    <SharedUIProvider>
-                      <Layout {...layoutProps}>
-                        <Component {...pageProps} />
-                        <CookieBanner setValue={setValue} value={value} />
-                      </Layout>
-                    </SharedUIProvider>
-                  </SetupWeb3Context>
-                </ModalProvider>
-              </AppContextProvider>
+              <Provider container={containers.root}>
+                <AppContextProvider>
+                  <ModalProvider>
+                    <HeadTags />
+                    {seoTags}
+                    <SetupWeb3Context>
+                      <SharedUIProvider>
+                        <Layout {...layoutProps}>
+                          <Component {...pageProps} />
+                          <CookieBanner setValue={setValue} value={value} />
+                        </Layout>
+                      </SharedUIProvider>
+                    </SetupWeb3Context>
+                  </ModalProvider>
+                </AppContextProvider>
+              </Provider>
             </Web3ReactProvider>
           </MDXProvider>
         </CacheProvider>
