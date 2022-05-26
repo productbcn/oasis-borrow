@@ -97,7 +97,7 @@
   "reset": "Reset",
   "create-proxy": "Create a proxy",
   "create-proxy-btn": "Create Proxy",
-  "create-proxy-desc": "In order to use Savings and other features, you will need a wallet proxy.",
+  "create-proxy-desc": "To use Savings and other features, you will need a wallet proxy.",
   "create-vault": "Create Vault",
   "create-your-vault": "Create your vault",
   "creating-proxy": "Creating Proxy",
@@ -192,7 +192,7 @@
   "fees": "Fees",
   "fees-plus-gas": "Fees + (max gas fee)",
   "max-gas-fee": "Max gas fee",
-  "gas-explanation": "The Max gas fee is the maximum that will be paid in gas for the transaction. We want your transactions to succeed, so we provide a max gas price of 2x the current base fee + a priority fee that will get you in the next block in 95% of the times. In most cases you will pay a lot less than this maximum.",
+  "gas-explanation": "The Max gas fee is the maximum that will be paid in gas for the transaction. We want your transactions to succeed, so we provide a max gas price of 2x the current base fee + a priority fee that will get you in the next block 95% of the time. In most cases, you will pay a lot less than this maximum.",
   "filters": {
     "lp-token": "LP tokens",
     "stablecoin": "Stablecoins",
@@ -379,8 +379,8 @@
         "ratio": "{{percentageRatio}} minimum active coll ratio",
         "price": "Minimum active Coll ratio Price",
         "modal": {
-          "para1": "Your collateralization ratio is calculated by: value of your collateral / Dai debt. The minimum active col. ratio is the ratio under which no further debt can be generated, nor collateral withdrawn. This is separate from the liquidation ratio.",
-          "para2": "If a vault is under the min. active col. ratio, collateral can be deposit and debt paid back.",
+          "para1": "Your collateralization ratio is calculated by: the value of your collateral / Dai debt. The minimum active col. ratio is the ratio under which no further debt can be generated, nor collateral withdrawn. This is separate from the liquidation ratio.",
+          "para2": "If a vault is under the min. active col. ratio, collateral can be deposited and debt paid back.",
           "para3": "The min. active col. ratio price displayed is the price of the collateral at this ratio."
         }
       }
@@ -390,7 +390,7 @@
     "tooltip": {
       "vaultId": "The Vault ID is a unique reference for your Maker Vault in Oasis.app.",
       "stabilityFee": "The Maker Protocol collects a Stability Fee on Dai that is generated from Maker Vaults. It is a variable-rate fee that changes when Maker’s governing body votes on proposals put forth by Risk Teams.",
-      "liquidationFee": "If your vault is liquidated, a liquidation penalty is added to your vault’s total outstanding debt in Dai, which results in more collateral being sold to cover the outstanding debt. This is done to incentivize vaults owners to avoid liquidation.\nThe size of the liquidation penalty is determined by the Liquidation Fee which is calculated based on the debt in the vault.",
+      "liquidationFee": "If your vault is liquidated, a liquidation penalty is added to your vault’s total outstanding debt in Dai, which results in more collateral being sold to cover the outstanding debt. This is done to incentivize vault owners to avoid liquidation.\nThe size of the liquidation penalty is determined by the Liquidation Fee which is calculated based on the debt in the vault.",
       "min-collateral": "This is also called the Liquidation Ratio. If the Vault reaches below the minimum collateralization level it is considered undercollateralized and is subject to liquidation. Your collateral will then be partially auctioned off to cover outstanding debt and liquidation fee.",
       "dust-limit": "The Dust Limit specifies the minimum amount of DAI that can be minted for this type of Vault. This value is also called the \"Debt Floor\"."
     },
@@ -427,10 +427,10 @@
       "stop-loss-coll-ratio-desc": "The Stop Loss Collateral Ratio is the trigger point for executing the Stop Loss on this Vault based on the Collateral Ratio at the next OSM price. Should the next OSM price take the current Vault Collateralisation Ratio below the Stop Loss Collateral Ratio, then the Vault will be automatically closed.",
       "dynamic-stop-price": "Dynamic Stop price",
       "dynamic-stop-loss-price": "Dynamic Stop Loss Price",
-      "dynamic-stop-loss-price-desc": "The dynamic stop-loss price is the current price at which this Vault will be closed based on the set Stop Loss Collateralisation Ratio. The reason this price is dynamic is that the stop loss trigger is based on a collateralisation ratio, so when the Vault is adjusted, or Stability Fees accrue, it automatically adjusts the price at which the stop loss will trigger.",
+      "dynamic-stop-loss-price-desc": "The dynamic stop-loss price is the current price at which this Vault will be closed based on the set Stop Loss Collateralisation Ratio. The reason this price is dynamic is that the stop loss trigger is based on a collateralization ratio, so when the Vault is adjusted, or Stability Fees accrue, it automatically adjusts the price at which the stop loss will trigger.",
       "current-dynamic-stop-loss-price": "The current Dynamic Stop Loss Price is:",
       "max-token-on-stop-loss-trigger": "Est. {{token}} on stop loss trigger",
-      "max-token-on-stop-loss-trigger-desc": "The estimated {{token}} on stop loss trigger is the approximate amount of {{token}} you can expect to get returned to the wallet when the Vault has been closed because of Stop Loss. It is very difficult to give a perfect amount as it depends on several factors at the time of the Stop Loss trigger, such as market price, available liquidity and gas costs. This calculation assumes a 2% difference from Trigger Price to Market Price. The amount saved compared to liquidation is based on the assumption of not paying a Liquidation Penalty, currently set to {{liquidationPenalty}}.",
+      "max-token-on-stop-loss-trigger-desc": "The estimated {{token}} on stop loss trigger is the approximate amount of {{token}} you can expect to get returned to the wallet when the Vault has been closed because of Stop Loss. It is very difficult to give a perfect amount as it depends on several factors at the time of the Stop Loss trigger, such as market price, available liquidity, and gas costs. This calculation assumes a 2% difference from Trigger Price to Market Price. The amount saved compared to liquidation is based on the assumption of not paying a Liquidation Penalty, currently set to {{liquidationPenalty}}.",
       "current-coll-ratio": "Current coll ratio",
       "saving-comp-to-liquidation": "Saving compared to liquidation",
       "above-liquidation-price": "above liquidation price",
@@ -449,7 +449,7 @@
     "checkmark3": "Actions like using a flash loan, and buying or selling collateral are grouped into a single transaction for greater efficiency and savings",
     "checkmark4": "You can review the details of the changes on your vault before execution",
     "subheader2": "Important",
-    "paragraph2": "When you multiply your vault, you acquire collateral for funds you have borrowed against your own collateral. Make sure you understand the associated risks.",
+    "paragraph2": "When you multiply your vault, you acquire collateral for funds you have borrowed against your collateral. Make sure you understand the associated risks.",
     "button-not-supported": "Not supported for {{token}}",
     "button-start": "Multiply this Vault",
     "button-confirm": "Take me to the Multiply interface",
@@ -515,7 +515,7 @@
   "notification-status-sign": "Sign Tx",
   "of": "of",
   "one-of-some": "{{one}} of {{some}}",
-  "onramp-leave-message": "By clicking buy, you will leave Oasis and be redirected to a third party website where you will complete the buy process.",
+  "onramp-leave-message": "By clicking buy, you will leave Oasis and be redirected to a third-party website where you will complete the buying process.",
   "open-new-vault": "Open new Vault",
   "open-vault": {
     "title": "Open Vault"
@@ -526,7 +526,7 @@
   "pending-transactions": "Pending Transactions",
   "permissions": "Set permissions",
   "permissions-btn": "Set permissions",
-  "permissions-desc": "This permission allows Oasis to interact with the Dai in your wallet.",
+  "permissions-desc": "This permission allows Oasis to interact with Dai in your wallet.",
   "powered-by": "Powered by",
   "price": "Price",
   "proceed": "Proceed",
@@ -734,19 +734,19 @@
     "custom-allowance-amount-less-than-deposit-amount": "You need at least an allowance of your deposit amount to continue",
     "depositing-all-eth-balance": "You need some ETH to pay for the gas fees. Lower your deposit amount",
     "ledger-enable-contract-data": "Please enable Contract data on the Ledgers Ethereum app Settings",
-    "insufficient-eth-balance": "Your ETH balance is too low to pay for transaction",
+    "insufficient-eth-balance": "Your ETH balance is too low to pay for the transaction",
     "exchange-error": "Could not fetch exchange prices for doing this multiply action.",
     "withdraw-amount-exceeds-free-collateral": "You cannot withdraw more than {{maxWithdrawAmount}} {{token}}",
     "withdraw-amount-exceeds-free-collateral-at-next-price": "You cannot withdraw more than {{maxWithdrawAmount}} {{token}}",
     "generate-amount-exceeds-dai-yield-from-total-collateral": "The collateralization ratio for this Maker Vault is too low. Please generate less Dai",
     "generate-amount-exceeds-dai-yield-from-total-collateral-at-next-price": "The collateralization ratio for this Maker Vault is too low at the next price update. Please generate less Dai",
-    "payback-amount-exceeds-dai-balance": "You cannot payback more Dai than the amount in your wallet",
-    "payback-amount-exceeds-vault-debt": "You are trying to payback more than your Dai debt for this Maker Vault",
+    "payback-amount-exceeds-dai-balance": "You cannot pay back more Dai than the amount in your wallet",
+    "payback-amount-exceeds-vault-debt": "You are trying to pay back more than your Dai debt for this Maker Vault",
     "custom-collateral-allowance-amount-exceeds-maxuint256": "Allowance too large. Please decrease custom allowance amount",
     "custom-collateral-allowance-amount-less-than-deposit-amount": "You need at least an allowance of your deposit amount to continue",
     "custom-dai-allowance-amount-exceeds-maxuint256": "Allowance too large. Please decrease custom allowance amount",
     "custom-dai-allowance-amount-less-than-payback-amount": "You need at least an allowance of your payback amount to continue",
-    "withdraw-collateral-on-vault-under-debt-floor": "You cannot withdraw from your vault while it is below the minimum required of {{debtFloor}} Dai. To withdraw your collateral, payback your debt fully. Learn more about the Minimum Vault Debt <0>here</0>.",
+    "withdraw-collateral-on-vault-under-debt-floor": "You cannot withdraw from your vault while it is below the minimum required of {{debtFloor}} Dai. To withdraw your collateral, pay back your debt fully. Learn more about the Minimum Vault Debt <0>here</0>.",
     "has-to-deposit-collateral-on-empty-vault": "There is no collateral in this vault. Please first add collateral in the 'Other actions' tab, with the 'deposit collateral' action",
     "deposit-collateral-on-vault-under-debt-floor": "You cannot deposit to your vault while it is below the minimum debt required of {{debtFloor}}. To add more collateral, generate Dai to get above the minimum required. Learn more about the Minimum Vault Debt here <0>here</0>)",
     "invalid-slippage": "Custom slippage set too high for this transaction, please reduce your slippage setting",
@@ -755,17 +755,17 @@
   },
   "vault-warnings": {
     "potential-generate-amount-less-than-debt-floor": "Minimum Dai required to open a Vault is {{debtFloor}}. Please add more collateral to generate {{debtFloor}} Dai",
-    "debt-is-less-than-debt-floor": "Your current Dai debt is below the minimum of {{debtFloor}}. Because of this some Vault actions are not possible. Please generate more Dai to take you above the minimum or payback all your debt",
-    "vault-will-be-at-risk-level-danger": "With this action your vault will be at a collateralization ratio very close to the minimum required",
-    "vault-will-be-at-risk-level-danger-at-next-price": "With this action your vault will be at a collateralization ratio very close to the minimum required at the next price update",
-    "vault-will-be-at-risk-level-warning": "With this action your vault will be at a collateralization ratio near the minimum required",
-    "vault-will-be-at-risk-level-warning-at-next-price": "With this action your vault will be at a collateralization ratio near the minimum required at the next price update",
+    "debt-is-less-than-debt-floor": "Your current Dai debt is below the minimum of {{debtFloor}}. Because of this, some Vault actions are not possible. Please generate more Dai to take you above the minimum or pay back all your debt",
+    "vault-will-be-at-risk-level-danger": "With this action, your vault will be at a collateralization ratio very close to the minimum required",
+    "vault-will-be-at-risk-level-danger-at-next-price": "With this action, your vault will be at a collateralization ratio very close to the minimum required at the next price update",
+    "vault-will-be-at-risk-level-warning": "With this action, your vault will be at a collateralization ratio near the minimum required",
+    "vault-will-be-at-risk-level-warning-at-next-price": "With this action, your vault will be at a collateralization ratio near the minimum required at the next price update",
     "vault-is-currently-under-min-active-col-ratio": "Your vault is currently under the min active collateralization ratio at current or next price.  You can decrease the risk of the position, but not increase it.",
-    "vault-will-remain-under-min-active-col-ratio": "You are decreasing risk of this position, but it will remain under the minimum active col ratio.",
-    "insufficient-eth-balance": "Your ETH balance is potentially too low to pay for transaction"
+    "vault-will-remain-under-min-active-col-ratio": "You are decreasing the risk of this position, but it will remain under the minimum active col ratio.",
+    "insufficient-eth-balance": "Your ETH balance is potentially too low to pay for the transaction"
   },
   "vault-info-messages": {
-    "closing": "To close your vault, a part of your position will be sold to payback the outstanding debt. The rest of your collateral will be sent to your address."
+    "closing": "To close your vault, a part of your position will be sold to pay back the outstanding debt. The rest of your collateral will be sent to your address."
   },
   "vault-changes": {
     "order-information": "Order information",
@@ -830,9 +830,9 @@
     "liquidating": {
       "header1": "Your {{ collateral }} Maker Vault {{ id }} is about to get liquidated.",
       "header2": "{{ collateral }} Maker Vault {{ id }} is about to get liquidated.",
-      "subheader1": "The next price update of {{ collateral }} will cause a liquidation on this Maker Vault unless collateral is added, or Dai is paid back.",
+      "subheader1": "The next price update of {{ collateral }} will cause a liquidation on this Maker Vault unless the collateral is added, or Dai is paid back.",
       "subheader2": "Is this your Maker Vault? Please connect with address: {{ address }} and save your Maker Vault from liquidation.",
-      "subheader3": "This Vault is now available for liquidation and can be liquidated at anytime."
+      "subheader3": "This Vault is now available for liquidation and can be liquidated at any time."
     },
     "liquidated": {
       "header1": "Your Maker Vault got liquidated",
@@ -891,16 +891,16 @@
     },
     "subtext": {
       "collateral": "Deposit or withdraw from your Vault. Save gas by combining transactions.",
-      "dai": "Generate DAI from the collateral in your vault, or payback DAI. Save gas by combining transactions.",
+      "dai": "Generate DAI from the collateral in your vault, or pay back DAI. Save gas by combining transactions.",
       "edit": "Simulate your vault by configuring the amount of collateral to deposit, and DAI to generate.",
       "edit-multiply": "Simulate your vault by configuring the amount of collateral to deposit, and slide your multiply factor.",
       "edit-multiply-dai": "This vault can be created by simply <1>depositing DAI</1>. The transaction will create the {{token}} position for you based on this DAI deposit.",
-      "proxy": "With your smart proxy multiple actions can be performed in one transaction for your Vault. This proxy only needs to be set up once. Read more in the <1><2>Knowledge Base</2></1>",
-      "proxy-start": "With your smart proxy multiple actions can be performed in one transaction for your Vault. This proxy only needs to be set up once. Read more in the <1>Knowledge Base</1>.",
+      "proxy": "With your smart proxy, multiple actions can be performed in one transaction for your Vault. This proxy only needs to be set up once. Read more in the <1><2>Knowledge Base</2></1>",
+      "proxy-start": "With your smart proxy, multiple actions can be performed in one transaction for your Vault. This proxy only needs to be set up once. Read more in the <1>Knowledge Base</1>.",
       "proxy-success": "Your smart Proxy has been successfully set up. Read more in the <1>Knowledge Base →</1>",
       "proxy-progress": "Read more on smart proxy in the <1>Knowledge Base</1>.",
-      "allowance": "Specify an allowance to set a maximum on the amount of tokens the vault contracts can interact with.",
-      "daiAllowance": "Specify an allowance to set a maximum on the amount of tokens the vault contracts can interact with.",
+      "allowance": "Specify an allowance to set a maximum on the number of tokens the vault contracts can interact with.",
+      "daiAllowance": "Specify an allowance to set a maximum on the number of tokens the vault contracts can interact with.",
       "confirm": "This will update your vault to a multiply vault. It does not require a transaction. You will be able to switch it back to the Borrow view.",
       "review-manage": "Here you can review the details of the changes to your vault.",
       "confirm-in-progress": "Your Vault is currently being created.",
@@ -1117,15 +1117,15 @@
       "link": "https://wbtc.network/"
     },
     "usdc": {
-      "description": "USDC is a 1:1 USD-backed centralized stablecoin, fully regulated. USDC is natively supported on multiple layer 1 blockchains including Ethereum as an ERC-20 token, Algorand as an ASA token, Solana as a SPL token, TRON as an TRC-20 token, and Stellar as a native asset. It is operated by Circle.",
+      "description": "USDC is a 1:1 USD-backed centralized stablecoin, fully regulated. USDC is natively supported on multiple layer 1 blockchains including Ethereum as an ERC-20 token, Algorand as an ASA token, Solana as a SPL token, TRON as a TRC-20 token, and Stellar as a native asset. It is operated by Circle.",
       "link": "https://www.circle.com/en/about-circle"
     },
     "lp-token": {
-      "description": "Tokens deposited into a liquidity pool, automatically generates a new token that represents the share the depositor owns of that pool. This is called a liquidity provider (LP) token, and it can be used to borrow against. This has the effect of multiplying your liquidity share in the pool.",
+      "description": "Tokens deposited into a liquidity pool, automatically generate a new token that represents the share the depositor owns of that pool. This is called a liquidity provider (LP) token, and it can be used to borrow against. This has the effect of multiplying your liquidity share in the pool.",
       "link": "https://docs.uniswap.org/protocol/V2/guides/smart-contract-integration/providing-liquidity"
     },
     "yfi": {
-      "description": "Yearn.finance (YFI) is the governance token of the Yearn.finance platform. The platform is a yield optimizer that moves funds around the decentralized finance ecosystem in an effort to generate a high return. Multiply your exposure to YFI, or borrow against it.",
+      "description": "Yearn.finance (YFI) is the governance token of the Yearn.finance platform. The platform is a yield optimizer that moves funds around the decentralized finance ecosystem to generate a high return. Multiply your exposure to YFI, or borrow against it.",
       "link": "https://yearn.finance/"
     },
     "dai": {
@@ -1145,12 +1145,12 @@
       "link": "https://polygon.technology/"
     },
     "mana": {
-      "description": "MANA is the ERC-20 token built for Decentraland, a virtual reality platform powered by the ethereum blockchain. It is primarily used to buy goods, services and LAND (an NFT token) within Decentraland.",
+      "description": "MANA is the ERC-20 token built for Decentraland, a virtual reality platform powered by the Ethereum blockchain. It is primarily used to buy goods, services, and LAND (an NFT token) within Decentraland.",
       "link": "https://decentraland.org/"
     }
   },
-  "guni-slippage-overridden": "Your custom slippage has been overridden for this vault. GUNI vaults can only be opened with a slippage at 0.1%.",
-  "temporary-guni-message": "The max multiple for your GUNI position has been increased by Maker governance from 20x to 50x. To take advantage of this you will need to close this vault, and open a new GUNI position. Read more in ",
+  "guni-slippage-overridden": "Your custom slippage has been overridden for this vault. GUNI vaults can only be opened with slippage at 0.1%.",
+  "temporary-guni-message": "The max-multiple for your GUNI position has been increased by Maker governance from 20x to 50x. To take advantage of this you will need to close this vault and open a new GUNI position. Read more in ",
   "below": "below",
   "above": "above",
   "earn": {
