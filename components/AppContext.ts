@@ -176,6 +176,7 @@ import { bindDependencies } from '../helpers/di/bindDependencies'
 import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
+import { IBlocks } from 'interfaces/blockchain/IBlocks'
 
 export type TxData =
   | OpenData
@@ -330,7 +331,12 @@ function initializeUIChanges() {
   return uiChangesSubject
 }
 
-function _setupAppContext(web3Context: IWeb3Context, context: IContext, account: IAccount) {
+function _setupAppContext(
+  web3Context: IWeb3Context,
+  context: IContext,
+  account: IAccount,
+  blocks: IBlocks,
+) {
   // Web3 Context
   const web3Context$ = web3Context.get()
   const web3ContextConnected$ = web3Context.getConnected()
@@ -343,8 +349,8 @@ function _setupAppContext(web3Context: IWeb3Context, context: IContext, account:
   // Account
   const initializedAccount$ = account.get()
 
-  // Put into DI
-  const [onEveryBlock$] = createOnEveryBlock$(web3ContextConnected$)
+  // Blocks
+  const onEveryBlock$ = blocks.get()
 
   // Tagged version of IContext?
   const oracleContext$ = context$.pipe(
@@ -854,9 +860,14 @@ function _setupAppContext(web3Context: IWeb3Context, context: IContext, account:
 type TReturnAppContext = ReturnType<typeof _setupAppContext>
 
 export const setupAppContext = bindDependencies<
-  [IWeb3Context, IContext, IAccount],
+  [IWeb3Context, IContext, IAccount, IBlocks],
   TReturnAppContext
->(_setupAppContext, [ROOT_STREAMS.WEB3_CONTEXT, ROOT_STREAMS.CONTEXT, ROOT_STREAMS.ACCOUNT])
+>(_setupAppContext, [
+  ROOT_STREAMS.WEB3_CONTEXT,
+  ROOT_STREAMS.CONTEXT,
+  ROOT_STREAMS.ACCOUNT,
+  ROOT_STREAMS.BLOCKS,
+])
 
 export function bigNumberTostring(v: BigNumber): string {
   return v.toString()
