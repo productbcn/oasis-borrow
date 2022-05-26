@@ -7,6 +7,7 @@ import { setAllowance } from 'features/allowance/setAllowance'
 import { BalanceInfo, balanceInfoChange$ } from 'features/shared/balanceInfo'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { curry } from 'lodash'
 import { combineLatest, iif, merge, Observable, of, Subject, throwError } from 'rxjs'
 import { first, map, scan, shareReplay, switchMap } from 'rxjs/operators'
@@ -269,7 +270,7 @@ export const defaultMutableOpenVaultState: MutableOpenVaultState = {
 export function createOpenVault$(
   context$: Observable<ContextConnected>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
   priceInfo$: (token: string) => Observable<PriceInfo>,
   balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
@@ -301,7 +302,7 @@ export function createOpenVault$(
               priceInfo$(token),
               balanceInfo$(token, account),
               ilkData$(ilk),
-              proxyAddress$(account),
+              proxy.getProxy$(account),
             ).pipe(
               first(),
               switchMap(([priceInfo, balanceInfo, ilkData, proxyAddress]) =>
@@ -376,7 +377,7 @@ export function createOpenVault$(
                       createIlkDataChange$(ilkData$, ilk),
                     )
 
-                    const connectedProxyAddress$ = proxyAddress$(account)
+                    const connectedProxyAddress$ = proxy.getProxy$(account)
 
                     return merge(change$, environmentChanges$).pipe(
                       scan(apply, initialState),

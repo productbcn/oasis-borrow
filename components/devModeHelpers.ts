@@ -7,19 +7,20 @@ import { TxMetaKind } from 'blockchain/calls/txMeta'
 import { ContextConnected } from 'blockchain/network'
 import { TxHelpers$ } from 'components/AppContext'
 import { createExchangeQuote$ } from 'features/exchange/exchange'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { identity, Observable, of } from 'rxjs'
 import { switchMap } from 'rxjs/operators'
 
 export function pluginDevModeHelpers(
   txHelpers$: TxHelpers$,
   context$: Observable<ContextConnected>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
 ) {
   ;(window as any).removeProxy = () =>
     context$
       .pipe(
         switchMap((context) =>
-          proxyAddress$(context.account).pipe(
+          proxy.getProxy$(context.account).pipe(
             switchMap((proxyAddress) => {
               if (!proxyAddress) {
                 return of()
@@ -42,7 +43,7 @@ export function pluginDevModeHelpers(
     context$
       .pipe(
         switchMap((context) =>
-          proxyAddress$(context.account).pipe(
+          proxy.getProxy$(context.account).pipe(
             switchMap((proxyAddress) => {
               if (!proxyAddress) {
                 return of()

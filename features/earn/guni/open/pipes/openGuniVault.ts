@@ -70,6 +70,7 @@ import {
   GuniOpenMultiplyVaultConditions,
 } from './openGuniVaultConditions'
 import curry from 'ramda/src/curry'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 
 type InjectChange = { kind: 'injectStateOverride'; stateToOverride: Partial<OpenGuniVaultState> }
 
@@ -255,7 +256,7 @@ type GuniTxDataChange = { kind: 'guniTxData' } & GuniTxData
 export function createOpenGuniVault$(
   context$: Observable<ContextConnected>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
   priceInfo$: (token: string) => Observable<PriceInfo>,
   balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
@@ -298,7 +299,7 @@ export function createOpenGuniVault$(
             return combineLatest(
               priceInfo$(token),
               balanceInfo$(tokenInfo.token0, account),
-              proxyAddress$(account),
+              proxy.getProxy$(account),
             ).pipe(
               first(),
               switchMap(([priceInfo, balanceInfo, proxyAddress]) =>
@@ -520,7 +521,7 @@ export function createOpenGuniVault$(
                       applyGuniOpenVaultConditions,
                     )
 
-                    const connectedProxyAddress$ = proxyAddress$(account)
+                    const connectedProxyAddress$ = proxy.getProxy$(account)
 
                     const applyTransition = combineTransitions<OpenGuniVaultState>( // TODO: can we do it better?
                       (state) => addFormTransitions(txHelpers, change, state),

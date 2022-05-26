@@ -9,6 +9,7 @@ import { ExchangeAction, ExchangeType, Quote } from 'features/exchange/exchange'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { createHistoryChange$, VaultHistoryEvent } from 'features/vaultHistory/vaultHistory'
 import { GasEstimationStatus } from 'helpers/form'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { curry } from 'lodash'
 import { combineLatest, merge, Observable, of, Subject } from 'rxjs'
 import { first, map, scan, shareReplay, switchMap, tap, withLatestFrom } from 'rxjs/operators'
@@ -174,7 +175,7 @@ export const defaultMutableManageMultiplyVaultState = {
 export function createManageGuniVault$(
   context$: Observable<Context>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
   priceInfo$: (token: string) => Observable<PriceInfo>,
   balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
@@ -205,7 +206,7 @@ export function createManageGuniVault$(
             priceInfo$(vault.token),
             balanceInfo$(vault.token, account),
             ilkData$(vault.ilk),
-            account ? proxyAddress$(account) : of(undefined),
+            account ? proxy.getProxy$(account) : of(undefined),
           ).pipe(
             first(),
             switchMap(([priceInfo, balanceInfo, ilkData, proxyAddress]) => {
@@ -315,7 +316,7 @@ export function createManageGuniVault$(
                     }),
                   )
 
-                  const connectedProxyAddress$ = account ? proxyAddress$(account) : of(undefined)
+                  const connectedProxyAddress$ = account ? proxy.getProxy$(account) : of(undefined)
 
                   return merge(change$, environmentChanges$, guniDataChange$).pipe(
                     scan(apply, initialState),

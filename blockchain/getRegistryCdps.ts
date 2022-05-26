@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import isEqual from 'lodash/isEqual'
 import { of } from 'ramda'
 import { combineLatest, Observable } from 'rxjs'
@@ -15,13 +16,13 @@ export function createGetRegistryCdps$(
   onEveryBlock$: Observable<number>,
   context$: Observable<Context>,
   getRegistryCdp$: (arg: { ilk: string; usr: string }) => Observable<BigNumber | null>,
-  getUserProxyAddress$: (arg: string) => Observable<string | undefined>,
+  proxy: IProxy,
   ilks: string[],
   address: string,
 ): Observable<BigNumber[]> {
   return combineLatest(onEveryBlock$, context$).pipe(
     switchMap(([_, { joins }]) =>
-      getUserProxyAddress$(address).pipe(
+      proxy.getProxy$(address).pipe(
         switchMap((proxyAddress) => {
           if (proxyAddress === undefined) {
             return of([])

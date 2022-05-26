@@ -1,5 +1,7 @@
 import { TxState, TxStatus } from '@oasisdex/transactions'
 import BigNumber from 'bignumber.js'
+import { IContext } from 'interfaces/blockchain/IContext'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { combineLatest, Observable, of } from 'rxjs'
 import { map, startWith, switchMap, take } from 'rxjs/operators'
 
@@ -63,10 +65,10 @@ export function createMakerProtocolBonusAdapter(
   unclaimedInCrv$: (args: string) => Observable<BigNumber>,
   cropperCalls: CropperCalls,
   erc20Calls: Erc20Calls,
-  context$: Observable<ContextConnected>,
+  context: IContext,
   txHelpers$: Observable<TxHelpers>,
   vaultActions: VaultActionsLogicInterface,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   cdpId: BigNumber,
 ): BonusAdapter {
   const { stake$, share$, bonusTokenAddress$, stock$, total$, crops$ } = cropperCalls
@@ -132,9 +134,9 @@ export function createMakerProtocolBonusAdapter(
   )
 
   function claimAll(): Observable<ClaimTxnState> {
-    return combineLatest(txHelpers$, context$, vault$).pipe(
+    return combineLatest(txHelpers$, context.getConnected$(), vault$).pipe(
       switchMap(([{ sendWithGasEstimation }, context, { ilk }]) => {
-        return proxyAddress$(context.account).pipe(
+        return proxy.getProxy$(context.account).pipe(
           switchMap((proxyAddress) => {
             return sendWithGasEstimation(vaultActions.claimReward, {
               kind: TxMetaKind.claimReward,
@@ -166,7 +168,7 @@ export function createMakerProtocolBonusAdapter(
   }
 
   const claimAll$: Observable<(() => Observable<ClaimTxnState>) | undefined> = combineLatest(
-    context$.pipe(startWith<ContextConnected | undefined>(undefined)),
+    context.getConnected$().pipe(startWith<ContextConnected | undefined>(undefined)),
     vault$,
   ).pipe(
     map(([context, vault]) => {

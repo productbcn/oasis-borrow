@@ -3,6 +3,7 @@ export const STREAMS = {
   BLOCKS: Symbol.for('Blocks'),
   CONTEXT: Symbol.for('Context'),
   ACCOUNT: Symbol.for('Account'),
+  PROXY: Symbol.for('Proxy'),
 }
 
 // export const TAGS = {

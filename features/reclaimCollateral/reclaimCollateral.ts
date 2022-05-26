@@ -10,6 +10,7 @@ import { scan, startWith, switchMap } from 'rxjs/operators'
 
 import { TxError } from '../../helpers/types'
 import { Context } from '@oasisdex/transactions/lib/src/callHelpersContextParametrized'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 
 export type ReclaimChange =
   | { kind: 'reclaimWaitingForApproval' }
@@ -75,7 +76,7 @@ export function apply(state: ReclaimState, change: ReclaimChange): ReclaimState 
 export function createReclaimCollateral$(
   context$: Observable<Context>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   id: BigNumber,
   token: string,
   amount: BigNumber,
@@ -88,7 +89,7 @@ export function createReclaimCollateral$(
 
   return context$.pipe(
     switchMap((context) => {
-      return combineLatest(txHelpers$, proxyAddress$((context as ContextConnected).account)).pipe(
+      return combineLatest(txHelpers$, proxy.getProxy$((context as ContextConnected).account)).pipe(
         switchMap(([txHelpers, proxyAddress]) => {
           const initialState = {
             reclaim: () =>

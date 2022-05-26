@@ -10,6 +10,7 @@ import { BalanceInfo, balanceInfoChange$ } from 'features/shared/balanceInfo'
 import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { slippageChange$, UserSettingsState } from 'features/userSettings/userSettings'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { curry } from 'lodash'
 import { combineLatest, iif, merge, Observable, of, Subject, throwError } from 'rxjs'
 import { first, map, scan, shareReplay, switchMap, tap } from 'rxjs/operators'
@@ -284,7 +285,7 @@ export const defaultMutableOpenMultiplyVaultState: MutableOpenMultiplyVaultState
 export function createOpenMultiplyVault$(
   context$: Observable<ContextConnected>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
   priceInfo$: (token: string) => Observable<PriceInfo>,
   balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
@@ -314,7 +315,7 @@ export function createOpenMultiplyVault$(
             return combineLatest(
               priceInfo$(token),
               balanceInfo$(token, account),
-              proxyAddress$(account),
+              proxy.getProxy$(account),
             ).pipe(
               first(),
               switchMap(([priceInfo, balanceInfo, proxyAddress]) =>
@@ -400,7 +401,7 @@ export function createOpenMultiplyVault$(
                       slippageChange$(slippageLimit$),
                     )
 
-                    const connectedProxyAddress$ = proxyAddress$(account)
+                    const connectedProxyAddress$ = proxy.getProxy$(account)
 
                     return merge(change$, environmentChanges$).pipe(
                       scan(apply, initialState),

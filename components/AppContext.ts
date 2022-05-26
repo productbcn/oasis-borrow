@@ -104,6 +104,7 @@ import { createVaultsOverview$ } from 'features/vaultsOverview/vaultsOverview'
 import { IAccount } from 'interfaces/blockchain/IAccount'
 import { IBlocks } from 'interfaces/blockchain/IBlocks'
 import { IContext } from 'interfaces/blockchain/IContext'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import { memoize } from 'lodash'
@@ -332,6 +333,7 @@ function _setupAppContext(
   context: IContext,
   account: IAccount,
   blocks: IBlocks,
+  proxy: IProxy,
   oracle: IOracle,
 ) {
   // Web3 Context
@@ -370,11 +372,6 @@ function _setupAppContext(
   ): Observable<S> {
     return doGasEstimation(gasPrice$, tokenPricesInUSD$, txHelpers$, state, call)
   }
-
-  // DI behind IProxy
-  // base
-  const proxyAddress$ = memoize(curry(createProxyAddress$)(onEveryBlock$, context$))
-  const proxyOwner$ = memoize(curry(createProxyOwner$)(onEveryBlock$, context$))
 
   // DI behind IPositions?? IProtocol?? no...
   const cdpManagerUrns$ = observe(onEveryBlock$, context$, cdpManagerUrns, bigNumberTostring)
@@ -434,24 +431,12 @@ function _setupAppContext(
   )
 
   const charterCdps$ = memoize(
-    curry(createGetRegistryCdps$)(
-      onEveryBlock$,
-      context$,
-      cdpRegistryCdps$,
-      proxyAddress$,
-      charterIlks,
-    ),
+    curry(createGetRegistryCdps$)(onEveryBlock$, context$, cdpRegistryCdps$, proxy, charterIlks),
   )
   const cropJoinCdps$ = memoize(
-    curry(createGetRegistryCdps$)(
-      onEveryBlock$,
-      context$,
-      cdpRegistryCdps$,
-      proxyAddress$,
-      cropJoinIlks,
-    ),
+    curry(createGetRegistryCdps$)(onEveryBlock$, context$, cdpRegistryCdps$, proxy, cropJoinIlks),
   )
-  const standardCdps$ = memoize(curry(createStandardCdps$)(proxyAddress$, getCdps$))
+  const standardCdps$ = memoize(curry(createStandardCdps$)(proxy, getCdps$))
 
   const urnResolver$ = curry(createVaultResolver$)(
     cdpManagerIlks$,
@@ -460,7 +445,7 @@ function _setupAppContext(
     cropperUrnProxy$,
     cdpRegistryOwns$,
     cdpManagerOwner$,
-    proxyOwner$,
+    proxy,
   )
 
   const bonusAdapter = memoize(
@@ -482,10 +467,10 @@ function _setupAppContext(
           tokenName$,
           tokenBalanceRawForJoin$,
         },
-        connectedContext$,
+        context,
         txHelpers$,
         vaultActionsLogic(new CropjoinProxyActionsContractAdapter()),
-        proxyAddress$,
+        proxy,
         cdpId,
       ),
     bigNumberTostring,
@@ -517,7 +502,7 @@ function _setupAppContext(
 
   const vaultHistory$ = memoize(curry(createVaultHistory$)(context$, onEveryBlock$, vault$))
 
-  pluginDevModeHelpers(txHelpers$, connectedContext$, proxyAddress$)
+  pluginDevModeHelpers(txHelpers$, connectedContext$, proxy)
 
   const vaults$ = memoize(
     curry(createVaults$)(onEveryBlock$, vault$, context$, [
@@ -553,7 +538,7 @@ function _setupAppContext(
     createOpenVault$(
       connectedContext$,
       txHelpers$,
-      proxyAddress$,
+      proxy,
       allowance$,
       priceInfo$,
       balanceInfo$,
@@ -594,7 +579,7 @@ function _setupAppContext(
     createOpenMultiplyVault$(
       connectedContext$,
       txHelpers$,
-      proxyAddress$,
+      proxy,
       allowance$,
       priceInfo$,
       balanceInfo$,
@@ -614,7 +599,7 @@ function _setupAppContext(
     createOpenGuniVault$(
       connectedContext$,
       txHelpers$,
-      proxyAddress$,
+      proxy,
       allowance$,
       priceInfo$,
       balanceInfo$,
@@ -635,7 +620,7 @@ function _setupAppContext(
       createManageVault$<Vault, ManageStandardBorrowVaultState>(
         context$,
         txHelpers$,
-        proxyAddress$,
+        proxy,
         allowance$,
         priceInfo$,
         balanceInfo$,
@@ -657,7 +642,7 @@ function _setupAppContext(
       createManageVault$<InstiVault, ManageInstiVaultState>(
         context$,
         txHelpers$,
-        proxyAddress$,
+        proxy,
         allowance$,
         priceInfo$,
         balanceInfo$,
@@ -679,7 +664,7 @@ function _setupAppContext(
       createManageMultiplyVault$(
         context$,
         txHelpers$,
-        proxyAddress$,
+        proxy,
         allowance$,
         priceInfo$,
         balanceInfo$,
@@ -716,7 +701,7 @@ function _setupAppContext(
       createManageGuniVault$(
         context$,
         txHelpers$,
-        proxyAddress$,
+        proxy,
         allowance$,
         priceInfo$,
         balanceInfo$,
@@ -774,7 +759,7 @@ function _setupAppContext(
   )
 
   const reclaimCollateral$ = memoize(
-    curry(createReclaimCollateral$)(context$, txHelpers$, proxyAddress$),
+    curry(createReclaimCollateral$)(context$, txHelpers$, proxy),
     bigNumberTostring,
   )
   const accountData$ = createAccountData(web3Context$, balance$, vaults$, ensName$)
@@ -790,8 +775,8 @@ function _setupAppContext(
     onEveryBlock$,
     txHelpers$,
     transactionManager$,
-    proxyAddress$,
-    proxyOwner$,
+    proxyAddress$: proxy.getProxy$,
+    proxyOwner$: proxy.getProxyOwner$,
     vaults$,
     vault$,
     ilks$,
@@ -829,7 +814,7 @@ function _setupAppContext(
 type TReturnAppContext = ReturnType<typeof _setupAppContext>
 
 export const setupAppContext = bindDependencies<
-  [IWeb3Context, IContext, IAccount, IBlocks, IOracle],
+  [IWeb3Context, IContext, IAccount, IBlocks, IProxy, IOracle],
   TReturnAppContext
 >(
   _setupAppContext,
@@ -838,6 +823,7 @@ export const setupAppContext = bindDependencies<
     ROOT_STREAMS.CONTEXT,
     ROOT_STREAMS.ACCOUNT,
     ROOT_STREAMS.BLOCKS,
+    ROOT_STREAMS.PROXY,
     MAKER_STREAMS.ORACLE,
   ],
   containers.protocol.getInstance(),

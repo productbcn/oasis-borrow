@@ -15,6 +15,7 @@ import { PriceInfo, priceInfoChange$ } from 'features/shared/priceInfo'
 import { slippageChange$, UserSettingsState } from 'features/userSettings/userSettings'
 import { GasEstimationStatus, HasGasEstimation } from 'helpers/form'
 import { zero } from 'helpers/zero'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { curry } from 'lodash'
 import { combineLatest, merge, Observable, of, Subject } from 'rxjs'
 import { first, map, scan, shareReplay, switchMap, tap } from 'rxjs/operators'
@@ -471,7 +472,7 @@ export function defaultMutableManageMultiplyVaultState(
 export function createManageMultiplyVault$(
   context$: Observable<Context>,
   txHelpers$: Observable<TxHelpers>,
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   allowance$: (token: string, owner: string, spender: string) => Observable<BigNumber>,
   priceInfo$: (token: string) => Observable<PriceInfo>,
   balanceInfo$: (token: string, address: string | undefined) => Observable<BalanceInfo>,
@@ -501,7 +502,7 @@ export function createManageMultiplyVault$(
             priceInfo$(vault.token),
             balanceInfo$(vault.token, account),
             ilkData$(vault.ilk),
-            account ? proxyAddress$(account) : of(undefined),
+            account ? proxy.getProxy$(account) : of(undefined),
             slippageLimit$,
           ).pipe(
             first(),
@@ -578,7 +579,7 @@ export function createManageMultiplyVault$(
                     createStopLossDataChange$(automationTriggersData$, id),
                   )
 
-                  const connectedProxyAddress$ = account ? proxyAddress$(account) : of(undefined)
+                  const connectedProxyAddress$ = account ? proxy.getProxy$(account) : of(undefined)
 
                   return merge(change$, environmentChanges$).pipe(
                     scan(apply, initialState),

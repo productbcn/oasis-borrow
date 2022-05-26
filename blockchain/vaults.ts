@@ -2,6 +2,7 @@ import { VaultType } from '@prisma/client'
 import BigNumber from 'bignumber.js'
 import { Context } from 'blockchain/network'
 import { checkMultipleVaultsFromApi$ } from 'features/shared/vaultApi'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import { isEqual } from 'lodash'
 import { combineLatest, Observable, of } from 'rxjs'
@@ -37,11 +38,11 @@ export function fetchVaultsType(vaults: Vault[]): Observable<VaultWithType[]> {
 }
 
 export function createStandardCdps$(
-  proxyAddress$: (address: string) => Observable<string | undefined>,
+  proxy: IProxy,
   getCdps$: (arg: GetCdpsArgs) => Observable<GetCdpsResult>,
   address: string,
 ): Observable<BigNumber[]> {
-  return proxyAddress$(address).pipe(
+  return proxy.getProxy$(address).pipe(
     switchMap((proxyAddress) => {
       if (proxyAddress === undefined) {
         return of([])

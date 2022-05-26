@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js'
 import { charterIlks, cropJoinIlks } from 'blockchain/config'
+import { IProxy } from 'interfaces/blockchain/IProxy'
 import { combineLatest, Observable } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
 
@@ -24,7 +25,7 @@ export function createVaultResolver$(
   cropperUrnProxy$: (usr: string) => Observable<string>,
   cdpRegistryOwns$: (cdpId: BigNumber) => Observable<string>,
   cdpManagerOwner$: (cdpId: BigNumber) => Observable<string>,
-  proxyOwner$: (proxyAddress: string) => Observable<string>,
+  proxy: IProxy,
   cdpId: BigNumber,
 ): Observable<VaultResolve> {
   return cdpToIlk$(cdpId).pipe(
@@ -32,7 +33,7 @@ export function createVaultResolver$(
       if (charterIlks.includes(ilk)) {
         return cdpRegistryOwns$(cdpId).pipe(
           switchMap((usr) =>
-            combineLatest(charterUrnProxy$(usr), proxyOwner$(usr)).pipe(
+            combineLatest(charterUrnProxy$(usr), proxy.getProxyOwner$(usr)).pipe(
               map(([urnAddress, controller]) => ({
                 ilk,
                 owner: usr,
@@ -48,7 +49,7 @@ export function createVaultResolver$(
       if (cropJoinIlks.includes(ilk)) {
         return cdpRegistryOwns$(cdpId).pipe(
           switchMap((usr) =>
-            combineLatest(cropperUrnProxy$(usr), proxyOwner$(usr)).pipe(
+            combineLatest(cropperUrnProxy$(usr), proxy.getProxyOwner$(usr)).pipe(
               map(([urnAddress, controller]) => ({
                 ilk,
                 owner: usr,
@@ -63,7 +64,7 @@ export function createVaultResolver$(
 
       return combineLatest(cdpManagerOwner$(cdpId), cdpManagerUrns$(cdpId)).pipe(
         switchMap(([owner, urnAddress]) =>
-          proxyOwner$(owner).pipe(
+          proxy.getProxyOwner$(owner).pipe(
             map((controller) => ({
               ilk,
               owner,
