@@ -1,29 +1,24 @@
+import { Container } from 'inversify'
+import { isFunction } from 'lodash'
+
 import { containers } from '../../config/di'
 
-interface IBindDependencies {
-  <T, R>(
-    func: (args: T) => R,
-    dependencies: Array<symbol>,
-    options?: { container: keyof typeof containers },
-  ): () => R
-}
-
-function getContainer(containers: any, key: string | undefined) {
-  return key ? containers[key] : containers['root']
-}
-
 // eslint-disable-next-line func-style
-const bindDependencies: IBindDependencies = <T, R>(
-  func: (args: T) => R,
+const bindDependencies = <T extends any[], R>(
+  func: (...args: T) => R,
   dependencies: Array<symbol>,
-  options: { container: keyof typeof containers } | undefined,
+  container: Container = containers.root,
 ) => {
-  const container = getContainer(containers, options?.container)
-
-  const injections = dependencies.map((dependency: any) => {
+  const injections = dependencies.map((dependency: symbol) => {
     return container.get(dependency)
-  })
-  return func.bind(func, ...injections)
+  }) as T
+
+  // Call any factories so that bound functions receive an interface not a factory
+  // @ts-ignore
+  return func.bind(
+    func,
+    ...injections.map((injection) => (isFunction(injection) ? injection() : injection)),
+  )
 }
 
 export { bindDependencies }

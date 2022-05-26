@@ -13,6 +13,7 @@ import { HeadTags, PageSEOTags } from 'components/HeadTags'
 import { AppLayout, MarketingLayoutProps } from 'components/Layouts'
 import { CustomMDXLink } from 'components/Links'
 import { SharedUIProvider } from 'components/SharedUIProvider'
+import { containers } from 'config/di'
 import { cache } from 'emotion'
 import { ModalProvider } from 'helpers/modalHook'
 import { staticFilesRuntimeUrl } from 'helpers/staticPaths'
@@ -34,7 +35,6 @@ import { mixpanelInit } from '../analytics/mixpanel'
 import { loadFeatureToggles } from '../helpers/useFeatureToggle'
 import { useLocalStorage } from '../helpers/useLocalStorage'
 import nextI18NextConfig from '../next-i18next.config.js'
-import { containers } from 'config/di'
 
 function getLibrary(provider: any, connector: AbstractConnector | undefined): Web3 {
   const chainIdPromise = connector!.getChainId()

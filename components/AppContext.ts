@@ -183,7 +183,10 @@ import { bindDependencies } from '../helpers/di/bindDependencies'
 import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
-import { IContext } from 'interfaces/IContext'
+import { IContext } from 'interfaces/blockchain/IContext'
+import { IAccount } from 'interfaces/blockchain/IAccount'
+import { interfaces } from 'inversify'
+import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 
 export type TxData =
   | OpenData
@@ -338,22 +341,24 @@ function initializeUIChanges() {
   return uiChangesSubject
 }
 
-function _setupAppContext(context: IContext<Observable<Web3Context>>) {
-  const web3Context$ = context.create()
-  const setupWeb3Context$ = context.connect
+function _setupAppContext(web3Context: IWeb3Context, context: IContext, account: IAccount) {
+  // Web3 Context
+  const web3Context$ = web3Context.get()
+  const web3ContextConnected$ = web3Context.getConnected()
+  const setupWeb3Context$ = web3Context.connect
 
-  const account$ = createAccount$(web3Context$)
-  const initializedAccount$ = createInitializedAccount$(account$)
+  // App Context
+  const context$ = context.get()
+  const connectedContext$ = context.getConnected()
 
-  const web3ContextConnected$ = createWeb3ContextConnected$(web3Context$)
+  // Account
+  const initializedAccount$ = account.get()
 
+  // Put into DI
   const [onEveryBlock$] = createOnEveryBlock$(web3ContextConnected$)
 
-  const context$ = createContext$(web3ContextConnected$)
-
-  const connectedContext$ = createContextConnected$(context$)
-
-  combineLatest(account$, connectedContext$)
+  // Leave in?? Could be added to account entity...? As a side effect?
+  combineLatest(initializedAccount$, connectedContext$)
     .pipe(
       mergeMap(([account, network]) => {
         return of({
@@ -371,22 +376,27 @@ function _setupAppContext(context: IContext<Observable<Web3Context>>) {
       }
     })
 
+  // Tagged version of IContext?
   const oracleContext$ = context$.pipe(
     switchMap((ctx) => of({ ...ctx, account: ctx.mcdSpot.address })),
     shareReplay(1),
   ) as Observable<ContextConnected>
 
+  // DI behind ITransactions
   const [send, transactions$] = createSend<TxData>(
     initializedAccount$,
     onEveryBlock$,
     connectedContext$,
   )
 
+  // DI behind ITransactions
   const gasPrice$ = createGasPrice$(onEveryBlock$, context$)
 
+  // DI behind ITransactions
   const txHelpers$: TxHelpers$ = createTxHelpers$(connectedContext$, send, gasPrice$)
   const transactionManager$ = createTransactionManager(transactions$)
 
+  // DI behind ITransactions
   function addGasEstimation$<S extends HasGasEstimation>(
     state: S,
     call: (send: TxHelpers, state: S) => Observable<number> | undefined,
@@ -394,9 +404,12 @@ function _setupAppContext(context: IContext<Observable<Web3Context>>) {
     return doGasEstimation(gasPrice$, tokenPricesInUSD$, txHelpers$, state, call)
   }
 
+  // DI behind IProxy
   // base
   const proxyAddress$ = memoize(curry(createProxyAddress$)(onEveryBlock$, context$))
   const proxyOwner$ = memoize(curry(createProxyOwner$)(onEveryBlock$, context$))
+
+  // DI behind IPositions?? IProtocol?? no...
   const cdpManagerUrns$ = observe(onEveryBlock$, context$, cdpManagerUrns, bigNumberTostring)
   const cdpManagerIlks$ = observe(onEveryBlock$, context$, cdpManagerIlks, bigNumberTostring)
   const cdpManagerOwner$ = observe(onEveryBlock$, context$, cdpManagerOwner, bigNumberTostring)
@@ -871,9 +884,9 @@ function _setupAppContext(context: IContext<Observable<Web3Context>>) {
 type TReturnAppContext = ReturnType<typeof _setupAppContext>
 
 export const setupAppContext = bindDependencies<
-  IContext<Observable<Web3Context>>,
+  [IWeb3Context, IContext, IAccount],
   TReturnAppContext
->(_setupAppContext, [ROOT_STREAMS.WEB3_CONTEXT])
+>(_setupAppContext, [ROOT_STREAMS.WEB3_CONTEXT, ROOT_STREAMS.CONTEXT, ROOT_STREAMS.ACCOUNT])
 
 export function bigNumberTostring(v: BigNumber): string {
   return v.toString()

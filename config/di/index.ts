@@ -1,6 +1,6 @@
-import { rootContainerFactory } from 'blockchain/di'
+import { blockchainContainerFactory } from 'blockchain/di'
 
-const root = rootContainerFactory()
+const root = blockchainContainerFactory()
 
 export const containers = {
   root,
