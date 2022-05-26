@@ -12,43 +12,70 @@ import { Container } from 'inversify'
 import { MAKER_STREAMS } from 'protocols/maker/constants/identifiers'
 import { oracle } from 'protocols/maker/entities/oracle'
 
-function createBlockchainContainer(): Container {
-  const container = new Container()
-  container.bind<IWeb3Context>(STREAMS.WEB3_CONTEXT).toConstantValue(web3Context())
-  container
-    .bind<IBlocks>(STREAMS.BLOCKS)
-    .toConstantValue(blocks(container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT)))
-  container
-    .bind<IContext>(STREAMS.CONTEXT)
-    .toConstantValue(context(container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT)))
-  container
-    .bind<IAccount>(STREAMS.ACCOUNT)
-    .toConstantValue(
-      account(
-        container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT),
-        container.get<IContext>(STREAMS.CONTEXT),
-      ),
-    )
+const blockchainContainer = (function (): { getInstance: () => Container } {
+  let instance: Container
 
-  return container
+  function createInstance() {
+    const container = new Container()
+    container.bind<IWeb3Context>(STREAMS.WEB3_CONTEXT).toConstantValue(web3Context())
+    container
+      .bind<IBlocks>(STREAMS.BLOCKS)
+      .toConstantValue(blocks(container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT)))
+    container
+      .bind<IContext>(STREAMS.CONTEXT)
+      .toConstantValue(context(container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT)))
+    container
+      .bind<IAccount>(STREAMS.ACCOUNT)
+      .toConstantValue(
+        account(
+          container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT),
+          container.get<IContext>(STREAMS.CONTEXT),
+        ),
+      )
+
+    return container
+  }
+
+  return {
+    getInstance: () => {
+      if (!instance) {
+        instance = createInstance()
+      }
+
+      return instance
+    },
+  }
+})()
+
+const protocolContainer = (function (): { getInstance: () => Container } {
+  let instance: Container
+  function createInstance() {
+    const container = new Container()
+
+    container.parent = blockchainContainer.getInstance()
+    container
+      .bind<IOracle>(MAKER_STREAMS.ORACLE)
+      .toConstantValue(
+        oracle(
+          container.parent.get<IContext>(STREAMS.CONTEXT),
+          container.parent.get<IBlocks>(STREAMS.BLOCKS),
+        ),
+      )
+
+    return container
+  }
+  return {
+    getInstance: () => {
+      if (!instance) {
+        instance = createInstance()
+      }
+
+      return instance
+    },
+  }
+})()
+
+export const containers = {
+  blockchain: blockchainContainer,
+  protocol: protocolContainer,
 }
-
-export const blockchainContainer = createBlockchainContainer()
-
-function createProtocolContainer(): Container {
-  const container = new Container()
-
-  container.parent = blockchainContainer
-  container
-    .bind<IOracle>(MAKER_STREAMS.ORACLE)
-    .toConstantValue(
-      oracle(
-        container.parent.get<IContext>(STREAMS.CONTEXT),
-        container.parent.get<IBlocks>(STREAMS.BLOCKS),
-      ),
-    )
-
-  return container
-}
-
-export const protocolContainer = createProtocolContainer()

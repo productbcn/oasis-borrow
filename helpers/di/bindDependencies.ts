@@ -1,4 +1,4 @@
-import { blockchainContainer } from 'config/di'
+import { containers } from 'config/di'
 import { Container } from 'inversify'
 import { isFunction } from 'lodash'
 
@@ -6,7 +6,7 @@ import { isFunction } from 'lodash'
 const bindDependencies = <T extends any[], R>(
   func: (...args: T) => R,
   dependencies: Array<symbol>,
-  container: Container = blockchainContainer,
+  container: Container = containers.blockchain.getInstance(),
 ) => {
   const injections = dependencies.map((dependency: symbol) => {
     return container.get(dependency)

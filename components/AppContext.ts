@@ -145,7 +145,7 @@ import { vaultActionsLogic } from '../blockchain/calls/proxyActions/vaultActions
 import { spotIlk } from '../blockchain/calls/spot'
 import { charterIlks, cropJoinIlks } from '../blockchain/config'
 import { ContextConnected } from '../blockchain/network'
-import { protocolContainer } from '../config/di'
+import { containers } from '../config/di'
 import { createTransactionManager } from '../features/account/transactionManager'
 import { createBonusPipe$ } from '../features/bonus/bonusPipe'
 import { createMakerProtocolBonusAdapter } from '../features/bonus/makerProtocolBonusAdapter'
@@ -840,7 +840,7 @@ export const setupAppContext = bindDependencies<
     ROOT_STREAMS.BLOCKS,
     MAKER_STREAMS.ORACLE,
   ],
-  protocolContainer,
+  containers.protocol.getInstance(),
 )
 
 export function bigNumberTostring(v: BigNumber): string {
