@@ -2,6 +2,7 @@ import { VaultType } from '@prisma/client'
 import BigNumber from 'bignumber.js'
 import { Context } from 'blockchain/network'
 import { checkMultipleVaultsFromApi$ } from 'features/shared/vaultApi'
+import { IOracle } from 'interfaces/protocols/IOracle'
 import { isEqual } from 'lodash'
 import { combineLatest, Observable, of } from 'rxjs'
 import { distinctUntilChanged, map, mergeMap, shareReplay, switchMap } from 'rxjs/operators'
@@ -132,7 +133,7 @@ export function createVault$(
   vatUrns$: CallObservable<typeof vatUrns>,
   vatGem$: CallObservable<typeof vatGem>,
   ilkData$: (ilk: string) => Observable<IlkData>,
-  oraclePriceData$: (token: string) => Observable<OraclePriceData>,
+  oracle: IOracle,
   ilkToToken$: (ilk: string) => Observable<string>,
   context$: Observable<Context>,
   id: BigNumber,
@@ -144,7 +145,7 @@ export function createVault$(
           return combineLatest(
             vatUrns$({ ilk, urnAddress }),
             vatGem$({ ilk, urnAddress }),
-            oraclePriceData$(token),
+            oracle.getTokenPriceData$(token),
             ilkData$(ilk),
           ).pipe(
             switchMap(

@@ -1,12 +1,12 @@
 import { amountFromWei } from '@oasisdex/utils'
 import BigNumber from 'bignumber.js'
+import { IOracle } from 'interfaces/protocols/IOracle'
 import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs'
 import { distinctUntilChanged, map, shareReplay, switchMap } from 'rxjs/operators'
 
 import { maxUint256, tokenAllowance, tokenBalance } from './calls/erc20'
 import { CallObservable } from './calls/observe'
 import { Context } from './network'
-import { OraclePriceData } from './prices'
 
 export function createBalance$(
   onEveryBlock$: Observable<number>,
@@ -45,7 +45,7 @@ export type TokenBalances = Record<string, { balance: BigNumber; price: BigNumbe
 export function createAccountBalance$(
   tokenBalance$: (token: string, address: string) => Observable<BigNumber>,
   collateralTokens$: Observable<string[]>,
-  oraclePriceData$: (token: string) => Observable<OraclePriceData>,
+  oracle: IOracle,
   address: string,
 ): Observable<TokenBalances> {
   return collateralTokens$.pipe(
@@ -55,7 +55,7 @@ export function createAccountBalance$(
           combineLatest(
             of(collateralToken),
             tokenBalance$(collateralToken, address),
-            oraclePriceData$(collateralToken),
+            oracle.getTokenPriceData$(collateralToken),
           ),
         ),
       ),

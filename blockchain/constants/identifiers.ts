@@ -4,3 +4,7 @@ export const STREAMS = {
   CONTEXT: Symbol.for('Context'),
   ACCOUNT: Symbol.for('Account'),
 }
+
+// export const TAGS = {
+//   ORACLE: Symbol.for('Oracle'),
+// }

@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js'
+import { IOracle } from 'interfaces/protocols/IOracle'
 import moment from 'moment'
 import { combineLatest, Observable, of } from 'rxjs'
 import { shareReplay, switchMap } from 'rxjs/operators'
@@ -8,7 +9,6 @@ import { vatGem, vatUrns } from './calls/vat'
 import { VaultResolve } from './calls/vaultResolver'
 import { IlkData } from './ilks'
 import { Context } from './network'
-import { OraclePriceData } from './prices'
 import { buildPosition, collateralPriceAtRatio } from './vault.maths'
 import { Vault } from './vaults'
 
@@ -28,7 +28,7 @@ export function createInstiVault$(
   vatUrns$: CallObservable<typeof vatUrns>,
   vatGem$: CallObservable<typeof vatGem>,
   ilkData$: (ilk: string) => Observable<IlkData>,
-  oraclePriceData$: (token: string) => Observable<OraclePriceData>,
+  oracle: IOracle,
   ilkToToken$: (ilk: string) => Observable<string>,
   context$: Observable<Context>,
 
@@ -53,7 +53,7 @@ export function createInstiVault$(
           return combineLatest(
             vatUrns$({ ilk, urnAddress }),
             vatGem$({ ilk, urnAddress }),
-            oraclePriceData$(token),
+            oracle.getTokenPriceData$(token),
             ilkData$(ilk),
           ).pipe(
             switchMap(

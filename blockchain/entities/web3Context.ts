@@ -1,9 +1,8 @@
 import { ContractDesc, createWeb3Context$ } from '@oasisdex/web3-context'
+import { networksById } from 'blockchain/config'
 import { createWeb3ContextConnected$ } from 'blockchain/network'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 import { mapValues } from 'lodash'
-
-import { networksById } from '../../config'
 
 export function web3Context(): IWeb3Context {
   const chainIdToRpcUrl = mapValues(networksById, (network) => network.infuraUrl)
@@ -19,8 +18,8 @@ export function web3Context(): IWeb3Context {
   const web3ContextConnected$ = createWeb3ContextConnected$(web3Context$)
 
   return {
-    get: () => web3Context$,
-    getConnected: () => web3ContextConnected$,
-    connect: () => setupWeb3Context$(),
+    get$: () => web3Context$,
+    getConnected$: () => web3ContextConnected$,
+    connect$: () => setupWeb3Context$(),
   }
 }

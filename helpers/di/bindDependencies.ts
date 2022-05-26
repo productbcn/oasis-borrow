@@ -1,13 +1,12 @@
+import { blockchainContainer } from 'config/di'
 import { Container } from 'inversify'
 import { isFunction } from 'lodash'
-
-import { containers } from '../../config/di'
 
 // eslint-disable-next-line func-style
 const bindDependencies = <T extends any[], R>(
   func: (...args: T) => R,
   dependencies: Array<symbol>,
-  container: Container = containers.root,
+  container: Container = blockchainContainer,
 ) => {
   const injections = dependencies.map((dependency: symbol) => {
     return container.get(dependency)

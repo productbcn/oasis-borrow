@@ -17,7 +17,6 @@ import { cdpRegistryCdps, cdpRegistryOwns } from 'blockchain/calls/cdpRegistry'
 import { charterNib, charterPeace, charterUline, charterUrnProxy } from 'blockchain/calls/charter'
 import { getCdps } from 'blockchain/calls/getCdps'
 import { createIlkToToken$ } from 'blockchain/calls/ilkToToken'
-import { pipHop, pipPeek, pipPeep, pipZzz } from 'blockchain/calls/osm'
 import {
   CreateDsProxyData,
   createProxyAddress$,
@@ -34,17 +33,12 @@ import {
 } from 'blockchain/calls/proxyActions/proxyActions'
 import { vatGem, vatIlk, vatUrns } from 'blockchain/calls/vat'
 import { createVaultResolver$ } from 'blockchain/calls/vaultResolver'
-import { STREAMS as ROOT_STREAMS } from 'blockchain/di/constants/identifiers'
+import { STREAMS as ROOT_STREAMS } from 'blockchain/constants/identifiers'
 import { resolveENSName$ } from 'blockchain/ens'
 import { createGetRegistryCdps$ } from 'blockchain/getRegistryCdps'
 import { createIlkData$, createIlkDataList$, createIlks$ } from 'blockchain/ilks'
 import { createInstiVault$, InstiVault } from 'blockchain/instiVault'
-import {
-  createGasPrice$,
-  createOraclePriceData$,
-  GasPriceParams,
-  tokenPricesInUSD$,
-} from 'blockchain/prices'
+import { createGasPrice$, GasPriceParams, tokenPricesInUSD$ } from 'blockchain/prices'
 import {
   createAccountBalance$,
   createAllowance$,
@@ -108,12 +102,14 @@ import {
 } from 'features/userSettings/userSettingsLocal'
 import { createVaultsOverview$ } from 'features/vaultsOverview/vaultsOverview'
 import { IAccount } from 'interfaces/blockchain/IAccount'
+import { IBlocks } from 'interfaces/blockchain/IBlocks'
 import { IContext } from 'interfaces/blockchain/IContext'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
-import { interfaces } from 'inversify'
-import { isEqual, mapValues, memoize } from 'lodash'
-import { combineLatest, Observable, of, Subject } from 'rxjs'
-import { distinctUntilChanged, filter, map, mergeMap, shareReplay, switchMap } from 'rxjs/operators'
+import { IOracle } from 'interfaces/protocols/IOracle'
+import { memoize } from 'lodash'
+import { MAKER_STREAMS } from 'protocols/maker/constants/identifiers'
+import { combineLatest, Observable, Subject } from 'rxjs'
+import { filter, map, shareReplay } from 'rxjs/operators'
 
 import {
   cropperBonusTokenAddress,
@@ -148,7 +144,8 @@ import { proxyActionsAdapterResolver$ } from '../blockchain/calls/proxyActions/p
 import { vaultActionsLogic } from '../blockchain/calls/proxyActions/vaultActionsLogic'
 import { spotIlk } from '../blockchain/calls/spot'
 import { charterIlks, cropJoinIlks } from '../blockchain/config'
-import { ContextConnected, createOnEveryBlock$ } from '../blockchain/network'
+import { ContextConnected } from '../blockchain/network'
+import { protocolContainer } from '../config/di'
 import { createTransactionManager } from '../features/account/transactionManager'
 import { createBonusPipe$ } from '../features/bonus/bonusPipe'
 import { createMakerProtocolBonusAdapter } from '../features/bonus/makerProtocolBonusAdapter'
@@ -176,7 +173,6 @@ import { bindDependencies } from '../helpers/di/bindDependencies'
 import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
-import { IBlocks } from 'interfaces/blockchain/IBlocks'
 
 export type TxData =
   | OpenData
@@ -336,27 +332,22 @@ function _setupAppContext(
   context: IContext,
   account: IAccount,
   blocks: IBlocks,
+  oracle: IOracle,
 ) {
   // Web3 Context
-  const web3Context$ = web3Context.get()
-  const web3ContextConnected$ = web3Context.getConnected()
-  const setupWeb3Context$ = web3Context.connect
+  const web3Context$ = web3Context.get$()
+  const web3ContextConnected$ = web3Context.getConnected$()
+  const setupWeb3Context$ = web3Context.connect$
 
   // App Context
-  const context$ = context.get()
-  const connectedContext$ = context.getConnected()
+  const context$ = context.get$()
+  const connectedContext$ = context.getConnected$()
 
   // Account
-  const initializedAccount$ = account.get()
+  const initializedAccount$ = account.get$()
 
   // Blocks
-  const onEveryBlock$ = blocks.get()
-
-  // Tagged version of IContext?
-  const oracleContext$ = context$.pipe(
-    switchMap((ctx) => of({ ...ctx, account: ctx.mcdSpot.address })),
-    shareReplay(1),
-  ) as Observable<ContextConnected>
+  const onEveryBlock$ = blocks.get$()
 
   // DI behind ITransactions
   const [send, transactions$] = createSend<TxData>(
@@ -411,11 +402,6 @@ function _setupAppContext(
   const cropperCrops$ = observe(onEveryBlock$, context$, cropperCrops)
   const cropperBonusTokenAddress$ = observe(onEveryBlock$, context$, cropperBonusTokenAddress)
 
-  const pipZzz$ = observe(onEveryBlock$, context$, pipZzz)
-  const pipHop$ = observe(onEveryBlock$, context$, pipHop)
-  const pipPeek$ = observe(onEveryBlock$, oracleContext$, pipPeek)
-  const pipPeep$ = observe(onEveryBlock$, oracleContext$, pipPeep)
-
   const unclaimedCrvLdoRewardsForIlk$ = observe(onEveryBlock$, context$, crvLdoRewardsEarned)
 
   const getCdps$ = observe(onEveryBlock$, context$, getCdps)
@@ -425,10 +411,6 @@ function _setupAppContext(
     peace$: (args: { ilk: string; usr: string }) => charterPeace$(args),
     uline$: (args: { ilk: string; usr: string }) => charterUline$(args),
   }
-
-  const oraclePriceData$ = memoize(
-    curry(createOraclePriceData$)(context$, pipPeek$, pipPeep$, pipZzz$, pipHop$),
-  )
 
   const tokenBalance$ = observe(onEveryBlock$, context$, tokenBalance)
   const balance$ = memoize(
@@ -516,16 +498,7 @@ function _setupAppContext(
 
   const vault$ = memoize(
     (id: BigNumber) =>
-      createVault$(
-        urnResolver$,
-        vatUrns$,
-        vatGem$,
-        ilkData$,
-        oraclePriceData$,
-        ilkToToken$,
-        context$,
-        id,
-      ),
+      createVault$(urnResolver$, vatUrns$, vatGem$, ilkData$, oracle, ilkToToken$, context$, id),
     bigNumberTostring,
   )
 
@@ -535,7 +508,7 @@ function _setupAppContext(
       vatUrns$,
       vatGem$,
       ilkData$,
-      oraclePriceData$,
+      oracle,
       ilkToToken$,
       context$,
       charter,
@@ -558,16 +531,12 @@ function _setupAppContext(
 
   const collateralTokens$ = createCollateralTokens$(ilks$, ilkToToken$)
 
-  const accountBalances$ = curry(createAccountBalance$)(
-    balance$,
-    collateralTokens$,
-    oraclePriceData$,
-  )
+  const accountBalances$ = curry(createAccountBalance$)(balance$, collateralTokens$, oracle)
 
   const ilkDataList$ = createIlkDataList$(ilkData$, ilks$)
   const ilksWithBalance$ = createIlkDataListWithBalances$(context$, ilkDataList$, accountBalances$)
 
-  const priceInfo$ = curry(createPriceInfo$)(oraclePriceData$)
+  const priceInfo$ = curry(createPriceInfo$)(oracle)
 
   // TODO Don't allow undefined args like this
   const balanceInfo$ = curry(createBalanceInfo$)(balance$) as (
@@ -778,7 +747,7 @@ function _setupAppContext(
     bigNumberTostring,
   )
 
-  const collateralPrices$ = createCollateralPrices$(collateralTokens$, oraclePriceData$)
+  const collateralPrices$ = createCollateralPrices$(collateralTokens$, oracle)
 
   const productCardsData$ = createProductCardsData$(ilkDataList$, priceInfo$)
   const productCardsWithBalance$ = createProductCardsWithBalance$(ilksWithBalance$, priceInfo$)
@@ -860,14 +829,19 @@ function _setupAppContext(
 type TReturnAppContext = ReturnType<typeof _setupAppContext>
 
 export const setupAppContext = bindDependencies<
-  [IWeb3Context, IContext, IAccount, IBlocks],
+  [IWeb3Context, IContext, IAccount, IBlocks, IOracle],
   TReturnAppContext
->(_setupAppContext, [
-  ROOT_STREAMS.WEB3_CONTEXT,
-  ROOT_STREAMS.CONTEXT,
-  ROOT_STREAMS.ACCOUNT,
-  ROOT_STREAMS.BLOCKS,
-])
+>(
+  _setupAppContext,
+  [
+    ROOT_STREAMS.WEB3_CONTEXT,
+    ROOT_STREAMS.CONTEXT,
+    ROOT_STREAMS.ACCOUNT,
+    ROOT_STREAMS.BLOCKS,
+    MAKER_STREAMS.ORACLE,
+  ],
+  protocolContainer,
+)
 
 export function bigNumberTostring(v: BigNumber): string {
   return v.toString()

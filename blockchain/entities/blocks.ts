@@ -3,9 +3,9 @@ import { IBlocks } from 'interfaces/blockchain/IBlocks'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 
 export function blocks(web3Context: IWeb3Context): IBlocks {
-  const [onEveryBlock$] = createOnEveryBlock$(web3Context.getConnected())
+  const [onEveryBlock$] = createOnEveryBlock$(web3Context.getConnected$())
 
   return {
-    get: () => onEveryBlock$,
+    get$: () => onEveryBlock$,
   }
 }

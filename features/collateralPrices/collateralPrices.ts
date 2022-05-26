@@ -1,4 +1,5 @@
 import { OraclePriceData } from 'blockchain/prices'
+import { IOracle } from 'interfaces/protocols/IOracle'
 import { combineLatest, Observable, of } from 'rxjs'
 import { switchMap } from 'rxjs/operators'
 
@@ -12,15 +13,15 @@ export type CollateralPrices = CollateralPrice[]
 
 export function createCollateralPrices$(
   collateralTokens: Observable<string[]>,
-  oraclePriceData$: (token: string) => Observable<OraclePriceData>,
+  oracle: IOracle,
 ): Observable<CollateralPricesWithFilters> {
   return collateralTokens.pipe(
     switchMap((collateralTokens) =>
       combineLatest(
         ...collateralTokens.map((token) =>
-          oraclePriceData$(token).pipe(
-            switchMap((oraclePriceData) => of({ ...oraclePriceData, token })),
-          ),
+          oracle
+            .getTokenPriceData$(token)
+            .pipe(switchMap((oraclePriceData) => of({ ...oraclePriceData, token }))),
         ),
       ).pipe(switchMap((collateralPrices) => collateralPricesWithFilters$(collateralPrices))),
     ),

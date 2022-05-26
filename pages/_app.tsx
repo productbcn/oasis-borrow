@@ -13,11 +13,11 @@ import { HeadTags, PageSEOTags } from 'components/HeadTags'
 import { AppLayout, MarketingLayoutProps } from 'components/Layouts'
 import { CustomMDXLink } from 'components/Links'
 import { SharedUIProvider } from 'components/SharedUIProvider'
-import { containers } from 'config/di'
+// import { containers } from 'config/di'
 import { cache } from 'emotion'
 import { ModalProvider } from 'helpers/modalHook'
 import { staticFilesRuntimeUrl } from 'helpers/staticPaths'
-import { Provider } from 'inversify-react'
+// import { Provider } from 'inversify-react'
 import { appWithTranslation } from 'next-i18next'
 import { AppProps } from 'next/app'
 import Head from 'next/head'
@@ -163,22 +163,20 @@ function App({ Component, pageProps }: AppProps & CustomAppProps) {
           <MDXProvider components={{ ...components, a: CustomMDXLink }}>
             <Global styles={globalStyles} />
             <Web3ReactProvider {...{ getLibrary }}>
-              <Provider container={containers.root}>
-                <AppContextProvider>
-                  <ModalProvider>
-                    <HeadTags />
-                    {seoTags}
-                    <SetupWeb3Context>
-                      <SharedUIProvider>
-                        <Layout {...layoutProps}>
-                          <Component {...pageProps} />
-                          <CookieBanner setValue={setValue} value={value} />
-                        </Layout>
-                      </SharedUIProvider>
-                    </SetupWeb3Context>
-                  </ModalProvider>
-                </AppContextProvider>
-              </Provider>
+              <AppContextProvider>
+                <ModalProvider>
+                  <HeadTags />
+                  {seoTags}
+                  <SetupWeb3Context>
+                    <SharedUIProvider>
+                      <Layout {...layoutProps}>
+                        <Component {...pageProps} />
+                        <CookieBanner setValue={setValue} value={value} />
+                      </Layout>
+                    </SharedUIProvider>
+                  </SetupWeb3Context>
+                </ModalProvider>
+              </AppContextProvider>
             </Web3ReactProvider>
           </MDXProvider>
         </CacheProvider>
