@@ -5,7 +5,7 @@ import { mapValues } from 'lodash'
 
 import { networksById } from '../../config'
 
-export function web3Context$(): IWeb3Context {
+export function web3Context(): IWeb3Context {
   const chainIdToRpcUrl = mapValues(networksById, (network) => network.infuraUrl)
   const chainIdToDAIContractDesc: {
     [chainId: number]: ContractDesc

@@ -1,7 +1,4 @@
 import { createSend, SendFunction } from '@oasisdex/transactions'
-import { createWeb3Context$, Web3Context } from '@oasisdex/web3-context'
-import { trackingEvents } from 'analytics/analytics'
-import { mixpanelIdentify } from 'analytics/mixpanel'
 import { BigNumber } from 'bignumber.js'
 import {
   AutomationBotAddTriggerData,
@@ -110,6 +107,10 @@ import {
   saveUserSettingsLocalStorage$,
 } from 'features/userSettings/userSettingsLocal'
 import { createVaultsOverview$ } from 'features/vaultsOverview/vaultsOverview'
+import { IAccount } from 'interfaces/blockchain/IAccount'
+import { IContext } from 'interfaces/blockchain/IContext'
+import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
+import { interfaces } from 'inversify'
 import { isEqual, mapValues, memoize } from 'lodash'
 import { combineLatest, Observable, of, Subject } from 'rxjs'
 import { distinctUntilChanged, filter, map, mergeMap, shareReplay, switchMap } from 'rxjs/operators'
@@ -146,16 +147,8 @@ import {
 import { proxyActionsAdapterResolver$ } from '../blockchain/calls/proxyActions/proxyActionsAdapterResolver'
 import { vaultActionsLogic } from '../blockchain/calls/proxyActions/vaultActionsLogic'
 import { spotIlk } from '../blockchain/calls/spot'
-import { charterIlks, cropJoinIlks, networksById } from '../blockchain/config'
-import {
-  ContextConnected,
-  createAccount$,
-  createContext$,
-  createContextConnected$,
-  createInitializedAccount$,
-  createOnEveryBlock$,
-  createWeb3ContextConnected$,
-} from '../blockchain/network'
+import { charterIlks, cropJoinIlks } from '../blockchain/config'
+import { ContextConnected, createOnEveryBlock$ } from '../blockchain/network'
 import { createTransactionManager } from '../features/account/transactionManager'
 import { createBonusPipe$ } from '../features/bonus/bonusPipe'
 import { createMakerProtocolBonusAdapter } from '../features/bonus/makerProtocolBonusAdapter'
@@ -183,10 +176,6 @@ import { bindDependencies } from '../helpers/di/bindDependencies'
 import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
-import { IContext } from 'interfaces/blockchain/IContext'
-import { IAccount } from 'interfaces/blockchain/IAccount'
-import { interfaces } from 'inversify'
-import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 
 export type TxData =
   | OpenData
@@ -356,25 +345,6 @@ function _setupAppContext(web3Context: IWeb3Context, context: IContext, account:
 
   // Put into DI
   const [onEveryBlock$] = createOnEveryBlock$(web3ContextConnected$)
-
-  // Leave in?? Could be added to account entity...? As a side effect?
-  combineLatest(initializedAccount$, connectedContext$)
-    .pipe(
-      mergeMap(([account, network]) => {
-        return of({
-          networkName: network.name,
-          connectionKind: network.connectionKind,
-          account: account?.toLowerCase(),
-        })
-      }),
-      distinctUntilChanged(isEqual),
-    )
-    .subscribe(({ account, networkName, connectionKind }) => {
-      if (account) {
-        mixpanelIdentify(account, { walletType: connectionKind })
-        trackingEvents.accountChange(account, networkName, connectionKind)
-      }
-    })
 
   // Tagged version of IContext?
   const oracleContext$ = context$.pipe(
