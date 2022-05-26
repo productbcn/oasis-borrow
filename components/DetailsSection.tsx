@@ -33,7 +33,7 @@ export function DetailsSection({ title, badge, buttons, content, footer }: Detai
         >
           <Flex
             as="h2"
-            variant="headerSettings"
+            variant="header4"
             sx={{
               alignItems: 'center',
               height: '40px',

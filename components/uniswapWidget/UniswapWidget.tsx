@@ -428,7 +428,7 @@ export function UniswapWidget(props: { token?: string }) {
           }}
         >
           <Box sx={{ textAlign: 'center', px: 2 }}>
-            <Text variant="headerSettings" sx={{ mb: 2 }}>
+            <Text variant="header4" sx={{ mb: 2 }}>
               {t('exchange.onboarding.title')}
             </Text>
             <Text variant="paragraph3">

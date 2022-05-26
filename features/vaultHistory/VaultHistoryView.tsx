@@ -327,7 +327,7 @@ export function VaultHistoryView({ vaultHistory }: { vaultHistory: VaultHistoryE
             border: 'lightMuted',
           }}
         >
-          <Heading variant="headerSettings" sx={{ mb: 3 }}>
+          <Heading variant="header4" sx={{ mb: 3 }}>
             {t('vault-history')}
           </Heading>
           <DefinitionList>

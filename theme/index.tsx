@@ -117,28 +117,28 @@ const oasisBaseTheme = {
       fontFamily: 'heading',
       fontWeight: 'heading',
       lineHeight: 'heading',
-      fontSize: '52px',
+      fontSize: 8, // 52px
       color: 'primary',
     },
     header2: {
       fontFamily: 'heading',
       fontWeight: 'heading',
       lineHeight: 'heading',
-      fontSize: 7,
+      fontSize: 7, // 32px
       color: 'primary',
     },
     header3: {
       fontFamily: 'heading',
       fontWeight: 'bold',
       lineHeight: 'heading',
-      fontSize: 5,
+      fontSize: 5, // 20px
       color: 'primary',
     },
-    headerSettings: {
+    header4: {
       fontFamily: 'body',
       fontWeight: 'semiBold',
       lineHeight: 'heading',
-      fontSize: 4,
+      fontSize: 4, // 18px
       color: 'primary',
     },
     paragraph1: {

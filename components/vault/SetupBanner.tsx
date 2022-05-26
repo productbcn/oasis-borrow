@@ -52,7 +52,7 @@ export function SetupBanner({
             pr: [0, null, null, hasImage ? 4 : 3],
           }}
         >
-          <Heading as="h3" variant="headerSettings" sx={{ mb: 1 }}>
+          <Heading as="h3" variant="header4" sx={{ mb: 1 }}>
             {header}
           </Heading>
           <Text

@@ -37,7 +37,7 @@ export function SidebarSectionHeader({
       <Flex sx={{ minHeight: 40, alignItems: 'center' }}>
         <Text
           as="h2"
-          variant="headerSettings"
+          variant="header4"
           sx={{
             fontSize: 3,
             fontWeight: 600,

@@ -40,7 +40,7 @@ export function VaultInformation({ items }: VaultInformationProps) {
         maxWidth: '688px',
       }}
     >
-      <Heading variant="headerSettings" sx={{ mb: 3 }}>
+      <Heading variant="header4" sx={{ mb: 3 }}>
         {t('vault-information')}
       </Heading>
       <DefinitionList>
