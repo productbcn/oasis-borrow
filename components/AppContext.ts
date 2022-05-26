@@ -1,36 +1,9 @@
-import { createSend, SendFunction } from '@oasisdex/transactions'
 import { BigNumber } from 'bignumber.js'
-import {
-  AutomationBotAddTriggerData,
-  AutomationBotRemoveTriggerData,
-} from 'blockchain/calls/automationBot'
-import {
-  createSendTransaction,
-  createSendWithGasConstraints,
-  estimateGas,
-  EstimateGasFunction,
-  SendTransactionFunction,
-  TransactionDef,
-} from 'blockchain/calls/callsHelpers'
 import { cdpManagerIlks, cdpManagerOwner, cdpManagerUrns } from 'blockchain/calls/cdpManager'
 import { cdpRegistryCdps, cdpRegistryOwns } from 'blockchain/calls/cdpRegistry'
 import { charterNib, charterPeace, charterUline, charterUrnProxy } from 'blockchain/calls/charter'
 import { getCdps } from 'blockchain/calls/getCdps'
 import { createIlkToToken$ } from 'blockchain/calls/ilkToToken'
-import {
-  CreateDsProxyData,
-  createProxyAddress$,
-  createProxyOwner$,
-  SetProxyOwnerData,
-} from 'blockchain/calls/proxy'
-import {
-  CloseGuniMultiplyData,
-  CloseVaultData,
-  MultiplyAdjustData,
-  OpenGuniMultiplyData,
-  OpenMultiplyData,
-  ReclaimData,
-} from 'blockchain/calls/proxyActions/proxyActions'
 import { vatGem, vatIlk, vatUrns } from 'blockchain/calls/vat'
 import { createVaultResolver$ } from 'blockchain/calls/vaultResolver'
 import { STREAMS as ROOT_STREAMS } from 'blockchain/constants/identifiers'
@@ -38,7 +11,6 @@ import { resolveENSName$ } from 'blockchain/ens'
 import { createGetRegistryCdps$ } from 'blockchain/getRegistryCdps'
 import { createIlkData$, createIlkDataList$, createIlks$ } from 'blockchain/ilks'
 import { createInstiVault$, InstiVault } from 'blockchain/instiVault'
-import { createGasPrice$, GasPriceParams, tokenPricesInUSD$ } from 'blockchain/prices'
 import {
   createAccountBalance$,
   createAllowance$,
@@ -105,6 +77,7 @@ import { IAccount } from 'interfaces/blockchain/IAccount'
 import { IBlocks } from 'interfaces/blockchain/IBlocks'
 import { IContext } from 'interfaces/blockchain/IContext'
 import { IProxy } from 'interfaces/blockchain/IProxy'
+import { ITransactions } from 'interfaces/blockchain/ITransactions'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import { memoize } from 'lodash'
@@ -122,8 +95,6 @@ import {
 } from '../blockchain/calls/cropper'
 import { dogIlk } from '../blockchain/calls/dog'
 import {
-  ApproveData,
-  DisapproveData,
   tokenAllowance,
   tokenBalance,
   tokenBalanceRawForJoin,
@@ -135,19 +106,11 @@ import { jugIlk } from '../blockchain/calls/jug'
 import { crvLdoRewardsEarned } from '../blockchain/calls/lidoCrvRewards'
 import { observe } from '../blockchain/calls/observe'
 import { CropjoinProxyActionsContractAdapter } from '../blockchain/calls/proxyActions/adapters/CropjoinProxyActionsSmartContractAdapter'
-import {
-  ClaimRewardData,
-  DepositAndGenerateData,
-  OpenData,
-  WithdrawAndPaybackData,
-} from '../blockchain/calls/proxyActions/adapters/ProxyActionsSmartContractAdapterInterface'
 import { proxyActionsAdapterResolver$ } from '../blockchain/calls/proxyActions/proxyActionsAdapterResolver'
 import { vaultActionsLogic } from '../blockchain/calls/proxyActions/vaultActionsLogic'
 import { spotIlk } from '../blockchain/calls/spot'
 import { charterIlks, cropJoinIlks } from '../blockchain/config'
-import { ContextConnected } from '../blockchain/network'
 import { containers } from '../config/di'
-import { createTransactionManager } from '../features/account/transactionManager'
 import { createBonusPipe$ } from '../features/bonus/bonusPipe'
 import { createMakerProtocolBonusAdapter } from '../features/bonus/makerProtocolBonusAdapter'
 import {
@@ -171,63 +134,8 @@ import { jwtAuthSetupToken$ } from '../features/termsOfService/jwt'
 import { createTermsAcceptance$ } from '../features/termsOfService/termsAcceptance'
 import { createVaultHistory$ } from '../features/vaultHistory/vaultHistory'
 import { bindDependencies } from '../helpers/di/bindDependencies'
-import { doGasEstimation, HasGasEstimation } from '../helpers/form'
 import { createProductCardsData$, createProductCardsWithBalance$ } from '../helpers/productCards'
 import curry from 'ramda/src/curry'
-
-export type TxData =
-  | OpenData
-  | DepositAndGenerateData
-  | WithdrawAndPaybackData
-  | ApproveData
-  | DisapproveData
-  | CreateDsProxyData
-  | SetProxyOwnerData
-  | ReclaimData
-  | OpenMultiplyData
-  | MultiplyAdjustData
-  | CloseVaultData
-  | OpenGuniMultiplyData
-  | AutomationBotAddTriggerData
-  | AutomationBotRemoveTriggerData
-  | CloseGuniMultiplyData
-  | ClaimRewardData
-
-export interface TxHelpers {
-  send: SendTransactionFunction<TxData>
-  sendWithGasEstimation: SendTransactionFunction<TxData>
-  estimateGas: EstimateGasFunction<TxData>
-}
-
-export const protoTxHelpers: TxHelpers = {
-  send: () => null as any,
-  sendWithGasEstimation: () => null as any,
-  estimateGas: () => null as any,
-}
-
-export type AddGasEstimationFunction = <S extends HasGasEstimation>(
-  state: S,
-  call: (send: TxHelpers, state: S) => Observable<number> | undefined,
-) => Observable<S>
-
-export type TxHelpers$ = Observable<TxHelpers>
-
-function createTxHelpers$(
-  context$: Observable<ContextConnected>,
-  send: SendFunction<TxData>,
-  gasPrice$: Observable<GasPriceParams>,
-): TxHelpers$ {
-  return context$.pipe(
-    filter(({ status }) => status === 'connected'),
-    map((context) => ({
-      send: createSendTransaction(send, context),
-      sendWithGasEstimation: createSendWithGasConstraints(send, context, gasPrice$),
-      estimateGas: <B extends TxData>(def: TransactionDef<B>, args: B): Observable<number> => {
-        return estimateGas(context, def, args)
-      },
-    })),
-  )
-}
 
 export type SupportedUIChangeType =
   | AddFormChange
@@ -334,6 +242,7 @@ function _setupAppContext(
   account: IAccount,
   blocks: IBlocks,
   proxy: IProxy,
+  transactions: ITransactions,
   oracle: IOracle,
 ) {
   // Web3 Context
@@ -351,27 +260,10 @@ function _setupAppContext(
   // Blocks
   const onEveryBlock$ = blocks.get$()
 
-  // DI behind ITransactions
-  const [send, transactions$] = createSend<TxData>(
-    initializedAccount$,
-    onEveryBlock$,
-    connectedContext$,
-  )
-
-  // DI behind ITransactions
-  const gasPrice$ = createGasPrice$(onEveryBlock$, context$)
-
-  // DI behind ITransactions
-  const txHelpers$: TxHelpers$ = createTxHelpers$(connectedContext$, send, gasPrice$)
-  const transactionManager$ = createTransactionManager(transactions$)
-
-  // DI behind ITransactions
-  function addGasEstimation$<S extends HasGasEstimation>(
-    state: S,
-    call: (send: TxHelpers, state: S) => Observable<number> | undefined,
-  ): Observable<S> {
-    return doGasEstimation(gasPrice$, tokenPricesInUSD$, txHelpers$, state, call)
-  }
+  // Transactions
+  const txHelpers$ = transactions.getHelpers$()
+  const transactionManager$ = transactions.getManager$()
+  const addGasEstimation$ = transactions.getGasEstimate$
 
   // DI behind IPositions?? IProtocol?? no...
   const cdpManagerUrns$ = observe(onEveryBlock$, context$, cdpManagerUrns, bigNumberTostring)
@@ -814,7 +706,7 @@ function _setupAppContext(
 type TReturnAppContext = ReturnType<typeof _setupAppContext>
 
 export const setupAppContext = bindDependencies<
-  [IWeb3Context, IContext, IAccount, IBlocks, IProxy, IOracle],
+  [IWeb3Context, IContext, IAccount, IBlocks, IProxy, ITransactions, IOracle],
   TReturnAppContext
 >(
   _setupAppContext,
@@ -824,6 +716,7 @@ export const setupAppContext = bindDependencies<
     ROOT_STREAMS.ACCOUNT,
     ROOT_STREAMS.BLOCKS,
     ROOT_STREAMS.PROXY,
+    ROOT_STREAMS.TRANSACTIONS,
     MAKER_STREAMS.ORACLE,
   ],
   containers.protocol.getInstance(),

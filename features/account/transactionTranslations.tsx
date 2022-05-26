@@ -1,6 +1,6 @@
 import { TxState } from '@oasisdex/transactions'
 import { TxMetaKind } from 'blockchain/calls/txMeta'
-import { TxData } from 'components/AppContext'
+import { TxData } from 'blockchain/entities/transactions'
 import React from 'react'
 
 import { TxMgrTransaction, TxTranslator } from './transactionManager'

@@ -3,14 +3,16 @@ import { account } from 'blockchain/entities/account'
 import { blocks } from 'blockchain/entities/blocks'
 import { context } from 'blockchain/entities/context'
 import { proxy } from 'blockchain/entities/proxy'
+import { transactions } from 'blockchain/entities/transactions'
 import { web3Context } from 'blockchain/entities/web3Context'
 import { IAccount } from 'interfaces/blockchain/IAccount'
 import { IBlocks } from 'interfaces/blockchain/IBlocks'
 import { IContext } from 'interfaces/blockchain/IContext'
 import { IProxy } from 'interfaces/blockchain/IProxy'
+import { ITransactions } from 'interfaces/blockchain/ITransactions'
 import { IWeb3Context } from 'interfaces/blockchain/IWeb3Context'
 import { IOracle } from 'interfaces/protocols/IOracle'
-import { Container } from 'inversify'
+import { Container, interfaces } from 'inversify'
 import { MAKER_STREAMS } from 'protocols/maker/constants/identifiers'
 import { oracle } from 'protocols/maker/entities/oracle'
 
@@ -37,6 +39,15 @@ const blockchainContainer = (function (): { getInstance: () => Container } {
         account(
           container.get<IWeb3Context>(STREAMS.WEB3_CONTEXT),
           container.get<IContext>(STREAMS.CONTEXT),
+        ),
+      )
+    container
+      .bind<ITransactions>(STREAMS.TRANSACTIONS)
+      .toConstantValue(
+        transactions(
+          container.get<IContext>(STREAMS.CONTEXT),
+          container.get<IAccount>(STREAMS.ACCOUNT),
+          container.get<IBlocks>(STREAMS.BLOCKS),
         ),
       )
 

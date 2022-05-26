@@ -1,6 +1,6 @@
 import { TxStatus } from '@oasisdex/transactions'
 import { TxMetaKind } from 'blockchain/calls/txMeta'
-import { AddGasEstimationFunction, TxHelpers } from 'components/AppContext'
+import { AddGasEstimationFunction, TxHelpers } from 'blockchain/entities/transactions'
 import { VaultType } from 'features/generalManageVault/vaultType'
 import { saveVaultUsingApi$ } from 'features/shared/vaultApi'
 import { jwtAuthGetToken } from 'features/termsOfService/jwt'

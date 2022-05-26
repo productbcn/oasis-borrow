@@ -5,6 +5,7 @@
     "outDir": "build/dist",
     "module": "esnext",
     "target": "es2017",
+
     "lib": ["dom", "es2018", "esnext"],
     "sourceMap": true,
     "allowJs": true,
@@ -26,6 +27,7 @@
     "jsx": "preserve",
     "incremental": true
   },
+  "globalObject": "typeof self !== 'undefined' ? self : this",
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js'
-import { protoTxHelpers } from 'components/AppContext'
+import { protoTxHelpers } from 'blockchain/entities/transactions'
 import { mockBalanceInfo$ } from 'helpers/mocks/balanceInfo.mock'
 import { mockContextConnected } from 'helpers/mocks/context.mock'
 import { mockIlkData$ } from 'helpers/mocks/ilks.mock'

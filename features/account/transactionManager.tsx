@@ -1,6 +1,6 @@
 import { isDone, TxState, TxStatus } from '@oasisdex/transactions'
+import { TxData } from 'blockchain/entities/transactions'
 import { every1Seconds$ } from 'blockchain/network'
-import { TxData } from 'components/AppContext'
 import { isEqual } from 'lodash'
 import moment from 'moment'
 import { TFunction, withTranslation } from 'next-i18next'
@@ -22,7 +22,7 @@ export type NotificationTransaction = {
   withDescription: boolean
 }
 
-interface TransactionManager {
+export interface TransactionManager {
   pendingTransactions: TxMgrTransaction[]
   recentTransactions: TxMgrTransaction[]
   notificationTransaction?: NotificationTransaction

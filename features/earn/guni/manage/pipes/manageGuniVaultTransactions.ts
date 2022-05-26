@@ -3,7 +3,10 @@ import { Observable } from 'rxjs'
 import { createDsProxy } from '../../../../../blockchain/calls/proxy'
 import { closeGuniVaultCall } from '../../../../../blockchain/calls/proxyActions/proxyActions'
 import { TxMetaKind } from '../../../../../blockchain/calls/txMeta'
-import { AddGasEstimationFunction, TxHelpers } from '../../../../../components/AppContext'
+import {
+  AddGasEstimationFunction,
+  TxHelpers,
+} from '../../../../../blockchain/entities/transactions'
 import { zero } from '../../../../../helpers/zero'
 import { ManageMultiplyVaultState } from '../../../../multiply/manage/pipes/manageMultiplyVault'
 import { GuniTxData } from './manageGuniVault'

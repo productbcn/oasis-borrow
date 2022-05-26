@@ -1,7 +1,7 @@
 // TODO REMOVE NO CHECK
 // @ts-nocheck
 import { BigNumber } from 'bignumber.js'
-import { TxHelpers } from 'components/AppContext'
+import { TxHelpers } from 'blockchain/entities/transactions'
 import { BalanceInfo } from 'features/shared/balanceInfo'
 import { zero } from 'helpers/zero'
 

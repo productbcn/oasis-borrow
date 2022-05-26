@@ -1,4 +1,4 @@
-import { TxHelpers } from 'components/AppContext'
+import { TxHelpers } from 'blockchain/entities/transactions'
 import { createProxy } from 'features/proxy/createProxy'
 import { Observable } from 'rxjs'
 

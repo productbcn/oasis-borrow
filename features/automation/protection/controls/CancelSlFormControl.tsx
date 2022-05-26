@@ -8,7 +8,7 @@ import {
 import { TxMetaKind } from 'blockchain/calls/txMeta'
 import { IlkData } from 'blockchain/ilks'
 import { Vault } from 'blockchain/vaults'
-import { TxHelpers } from 'components/AppContext'
+import { TxHelpers } from 'blockchain/entities/transactions'
 import { useUIChanges } from 'helpers/uiChangesHook'
 import { zero } from 'helpers/zero'
 import React, { useMemo } from 'react'

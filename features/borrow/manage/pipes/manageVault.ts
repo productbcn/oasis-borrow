@@ -1,9 +1,9 @@
 import { BigNumber } from 'bignumber.js'
 import { maxUint256 } from 'blockchain/calls/erc20'
+import { AddGasEstimationFunction, TxHelpers } from 'blockchain/entities/transactions'
 import { createIlkDataChange$, IlkData } from 'blockchain/ilks'
 import { Context } from 'blockchain/network'
 import { createVaultChange$, Vault } from 'blockchain/vaults'
-import { AddGasEstimationFunction, TxHelpers } from 'components/AppContext'
 import { calculateInitialTotalSteps } from 'features/borrow/open/pipes/openVaultConditions'
 import {
   SaveVaultType,

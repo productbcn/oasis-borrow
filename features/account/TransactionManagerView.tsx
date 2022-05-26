@@ -3,7 +3,7 @@
 import { Icon } from '@makerdao/dai-ui-icons'
 import { TxMeta, TxState, TxStatus } from '@oasisdex/transactions'
 import { ActivityItem } from 'components/Activity'
-import { TxData } from 'components/AppContext'
+import { TxData } from 'blockchain/entities/transactions'
 import { useAppContext } from 'components/AppContextProvider'
 import { ViewMore } from 'components/ViewMore'
 import { useObservable } from 'helpers/observableHook'

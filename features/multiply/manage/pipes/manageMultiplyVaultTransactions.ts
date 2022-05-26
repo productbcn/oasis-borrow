@@ -9,7 +9,7 @@ import {
 } from 'blockchain/calls/proxyActions/proxyActions'
 import { TxMetaKind } from 'blockchain/calls/txMeta'
 import { Context } from 'blockchain/network'
-import { AddGasEstimationFunction, TxHelpers } from 'components/AppContext'
+import { AddGasEstimationFunction, TxHelpers } from 'blockchain/entities/transactions'
 import { getQuote$, getTokenMetaData } from 'features/exchange/exchange'
 import { transactionToX } from 'helpers/form'
 import { OAZO_FEE, SLIPPAGE } from 'helpers/multiply/calculations'

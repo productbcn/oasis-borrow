@@ -1,7 +1,7 @@
 import { TxStatus } from '@oasisdex/transactions'
 import { approve, ApproveData } from 'blockchain/calls/erc20'
 import { TxMetaKind } from 'blockchain/calls/txMeta'
-import { TxHelpers } from 'components/AppContext'
+import { TxHelpers } from 'blockchain/entities/transactions'
 import { transactionToX } from 'helpers/form'
 import { of } from 'rxjs'
 

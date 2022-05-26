@@ -13,6 +13,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators'
+import { ssrWindow } from 'ssr-window'
 
 import { getToken } from './tokensMetadata'
 
@@ -34,7 +35,7 @@ export function createGasPrice$(
   const minersTip = new BigNumber(5000000000)
 
   const blockNativeRequest$ = ajax({
-    url: `${window.location.origin}/api/gasPrice`,
+    url: `${ssrWindow.location.origin}/api/gasPrice`,
     method: 'GET',
     headers: {
       Accept: 'application/json',

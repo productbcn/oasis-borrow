@@ -131,6 +131,7 @@
     "rxjs": "^6.2.0",
     "rxjs-take-while-inclusive": "^2.1.0",
     "sass": "^1.49.4",
+    "ssr-window": "^4.0.2",
     "storybook-addon-next-router": "^3.1.1",
     "terser-webpack-plugin": "^5.3.1",
     "text-mask-addons": "^3.7.2",
