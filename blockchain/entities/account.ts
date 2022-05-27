@@ -31,13 +31,11 @@ function trackEvents(
     })
 }
 
-export function account(web3Context: IWeb3Context, context: IContext): IAccount {
-  const account$ = createAccount$(web3Context.get$())
+export function account$(web3Context: IWeb3Context, context: IContext): IAccount {
+  const account$ = createAccount$(web3Context.context$)
   const initializedAccount$ = createInitializedAccount$(account$)
 
-  trackEvents(initializedAccount$, context.getConnected$())
+  trackEvents(initializedAccount$, context.connectedContext$)
 
-  return {
-    get$: () => initializedAccount$,
-  }
+  return () => initializedAccount$
 }

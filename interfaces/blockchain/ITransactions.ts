@@ -1,4 +1,4 @@
-import { TxHelpers, TxHelpers$ } from 'components/AppContext'
+import { TxHelpers, TxHelpers$ } from 'blockchain/entities/transactions'
 import { TransactionManager } from 'features/account/transactionManager'
 import { HasGasEstimation } from 'helpers/form'
 import { Observable } from 'rxjs'

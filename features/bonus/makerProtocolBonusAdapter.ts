@@ -134,7 +134,7 @@ export function createMakerProtocolBonusAdapter(
   )
 
   function claimAll(): Observable<ClaimTxnState> {
-    return combineLatest(txHelpers$, context.getConnected$(), vault$).pipe(
+    return combineLatest(txHelpers$, context.connectedContext$, vault$).pipe(
       switchMap(([{ sendWithGasEstimation }, context, { ilk }]) => {
         return proxy.getProxy$(context.account).pipe(
           switchMap((proxyAddress) => {
@@ -168,7 +168,7 @@ export function createMakerProtocolBonusAdapter(
   }
 
   const claimAll$: Observable<(() => Observable<ClaimTxnState>) | undefined> = combineLatest(
-    context.getConnected$().pipe(startWith<ContextConnected | undefined>(undefined)),
+    context.connectedContext$.pipe(startWith<ContextConnected | undefined>(undefined)),
     vault$,
   ).pipe(
     map(([context, vault]) => {

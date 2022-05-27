@@ -8,19 +8,18 @@ import { distinctUntilChanged, map, shareReplay, switchMap } from 'rxjs/operator
 
 import { maxUint256, tokenAllowance, tokenBalance } from './calls/erc20'
 import { CallObservable } from './calls/observe'
-import { Context } from './network'
 
 export function createBalance$(
-  blocks: IBlocks,
+  blocks$: IBlocks,
   context: IContext,
   tokenBalance$: CallObservable<typeof tokenBalance>,
   token: string,
   address: string,
 ) {
-  return context.get$().pipe(
+  return context.context$.pipe(
     switchMap(({ web3 }) => {
       if (token === 'ETH') {
-        return blocks.get$().pipe(
+        return blocks$().pipe(
           switchMap(() => bindNodeCallback(web3.eth.getBalance)(address)),
           map((ethBalance: string) => amountFromWei(new BigNumber(ethBalance))),
           distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
@@ -75,14 +74,13 @@ export function createAccountBalance$(
 }
 
 export function createAllowance$(
-  // context$: Observable<Context>,
   context: IContext,
   tokenAllowance$: CallObservable<typeof tokenAllowance>,
   token: string,
   owner: string,
   spender: string,
 ) {
-  return context.get$().pipe(
+  return context.context$.pipe(
     switchMap(() => {
       if (token === 'ETH') return of(maxUint256)
       return tokenAllowance$({ token, owner, spender })

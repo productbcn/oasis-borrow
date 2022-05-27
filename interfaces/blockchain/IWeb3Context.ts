@@ -6,7 +6,7 @@ import {
 import { Observable } from 'rxjs'
 
 export interface IWeb3Context {
-  get$: () => Observable<Web3Context>
-  getConnected$: () => Observable<Web3ContextConnectedReadonly | Web3ContextConnected>
+  context$: Observable<Web3Context>
+  connectedContext$: Observable<Web3ContextConnectedReadonly | Web3ContextConnected>
   connect$: () => void
 }

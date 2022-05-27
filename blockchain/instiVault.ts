@@ -45,7 +45,7 @@ export function createInstiVault$(
     switchMap(({ urnAddress, ilk, owner, type: makerType, controller }) =>
       combineLatest(
         ilkToToken$(ilk),
-        context.get$(),
+        context.context$,
         charter.nib$({ ilk, usr: owner }),
         charter.peace$({ ilk, usr: owner }),
         charter.uline$({ ilk, usr: owner }),

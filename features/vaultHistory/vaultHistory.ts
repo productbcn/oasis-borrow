@@ -247,16 +247,16 @@ function addReclaimFlag(events: VaultHistoryEvent[]) {
 
 export function createVaultHistory$(
   context: IContext,
-  blocks: IBlocks,
+  blocks$: IBlocks,
   vault$: (id: BigNumber) => Observable<Vault>,
   vaultId: BigNumber,
 ): Observable<VaultHistoryEvent[]> {
   const makeClient = memoize(
     (url: string) => new GraphQLClient(url, { fetch: fetchWithOperationId }),
   )
-  return combineLatest(context.get$(), vault$(vaultId)).pipe(
+  return combineLatest(context.connectedContext$, vault$(vaultId)).pipe(
     switchMap(([{ etherscan, cacheApi, ethtx }, { token, address, id }]) => {
-      return blocks.get$().pipe(
+      return blocks$().pipe(
         switchMap(() => {
           const apiClient = makeClient(cacheApi)
 

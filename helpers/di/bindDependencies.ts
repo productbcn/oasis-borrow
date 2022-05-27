@@ -14,10 +14,7 @@ const bindDependencies = <T extends any[], R>(
 
   // Call any factories so that bound functions receive an interface not a factory
   // @ts-ignore
-  return func.bind(
-    func,
-    ...injections.map((injection) => (isFunction(injection) ? injection() : injection)),
-  )
+  return func.bind(func, ...injections)
 }
 
 export { bindDependencies }

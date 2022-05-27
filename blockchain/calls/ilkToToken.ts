@@ -16,7 +16,7 @@ export const ilkTokenAddress: CallDef<string, string> = {
 }
 
 export function createIlkToToken$(context: IContext, ilk: string): Observable<string> {
-  return context.get$().pipe(
+  return context.context$.pipe(
     switchMap((context) =>
       defer(() => call(context, ilkTokenAddress)(ilk)).pipe(
         map((tokenAddress) => {

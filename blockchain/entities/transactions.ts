@@ -93,15 +93,15 @@ export function createTxHelpers$(
 }
 
 export function transactions(context: IContext, account: IAccount, blocks: IBlocks): ITransactions {
-  const onEveryBlock$ = blocks.get$()
-  const initializedAccount$ = account.get$()
-  const connectedContext$ = context.getConnected$()
-  const context$ = context.get$()
+  const onEveryBlock$ = blocks()
+  const initializedAccount$ = account()
+  const connectedContext$ = context.connectedContext$
+  const context$ = context.context$
 
   const [send, transactions$] = createSend<TxData>(
     initializedAccount$,
     onEveryBlock$,
-    connectedContext$,
+    context.connectedContext$,
   )
 
   const gasPrice$ = createGasPrice$(onEveryBlock$, context$)

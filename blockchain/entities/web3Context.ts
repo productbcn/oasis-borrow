@@ -18,8 +18,8 @@ export function web3Context(): IWeb3Context {
   const web3ContextConnected$ = createWeb3ContextConnected$(web3Context$)
 
   return {
-    get$: () => web3Context$,
-    getConnected$: () => web3ContextConnected$,
+    context$: web3Context$,
+    connectedContext$: web3ContextConnected$,
     connect$: () => setupWeb3Context$(),
   }
 }

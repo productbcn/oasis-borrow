@@ -239,26 +239,26 @@ function initializeUIChanges() {
 function _setupAppContext(
   web3Context: IWeb3Context,
   context: IContext,
-  account: IAccount,
-  blocks: IBlocks,
+  account$: IAccount,
+  blocks$: IBlocks,
   proxy: IProxy,
   transactions: ITransactions,
   oracle: IOracle,
 ) {
   // Web3 Context
-  const web3Context$ = web3Context.get$()
-  const web3ContextConnected$ = web3Context.getConnected$()
+  const web3Context$ = web3Context.context$
+  const web3ContextConnected$ = web3Context.connectedContext$
   const setupWeb3Context$ = web3Context.connect$
 
   // App Context
-  const context$ = context.get$()
-  const connectedContext$ = context.getConnected$()
+  const context$ = context.context$
+  const connectedContext$ = context.connectedContext$
 
   // Account
-  const initializedAccount$ = account.get$()
+  const initializedAccount$ = account$()
 
   // Blocks
-  const onEveryBlock$ = blocks.get$()
+  const onEveryBlock$ = blocks$()
 
   // Transactions
   const txHelpers$ = transactions.getHelpers$()
@@ -303,7 +303,7 @@ function _setupAppContext(
 
   const tokenBalance$ = observe(onEveryBlock$, context$, tokenBalance)
   const balance$ = memoize(
-    curry(createBalance$)(blocks, context, tokenBalance$),
+    curry(createBalance$)(blocks$, context, tokenBalance$),
     (token, address) => `${token}_${address}`,
   )
   const ensName$ = memoize(curry(resolveENSName$)(context), (address) => address)
@@ -392,7 +392,7 @@ function _setupAppContext(
     ),
   )
 
-  const vaultHistory$ = memoize(curry(createVaultHistory$)(context, blocks, vault$))
+  const vaultHistory$ = memoize(curry(createVaultHistory$)(context, blocks$, vault$))
 
   pluginDevModeHelpers(txHelpers$, connectedContext$, proxy)
 

@@ -12,8 +12,8 @@ import { shareReplay, switchMap } from 'rxjs/operators'
 import curry from 'ramda/src/curry'
 
 export function oracle(context: IContext, blocks: IBlocks): IOracle {
-  const context$ = context.get$()
-  const onEveryBlock$ = blocks.get$()
+  const context$ = context.context$
+  const onEveryBlock$ = blocks()
   const oracleContext$ = context$.pipe(
     switchMap((ctx) => of({ ...ctx, account: ctx.mcdSpot.address })),
     shareReplay(1),
