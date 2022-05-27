@@ -1,10 +1,10 @@
 import { contractDesc } from 'blockchain/config'
+import { IContext } from 'interfaces/blockchain/IContext'
 import { defer, Observable } from 'rxjs'
 import { map, shareReplay, switchMap } from 'rxjs/operators'
 import { McdGemJoin } from 'types/web3-v1-contracts/mcd-gem-join'
 
 import * as mcdGemJoinAbi from '../abi/mcd-gem-join.json'
-import { Context } from '../network'
 import { call, CallDef } from './callsHelpers'
 
 export const ilkTokenAddress: CallDef<string, string> = {
@@ -15,8 +15,8 @@ export const ilkTokenAddress: CallDef<string, string> = {
   prepareArgs: (_ilk: string) => [],
 }
 
-export function createIlkToToken$(context$: Observable<Context>, ilk: string): Observable<string> {
-  return context$.pipe(
+export function createIlkToToken$(context: IContext, ilk: string): Observable<string> {
+  return context.get$().pipe(
     switchMap((context) =>
       defer(() => call(context, ilkTokenAddress)(ilk)).pipe(
         map((tokenAddress) => {

@@ -2,6 +2,7 @@ import { VaultType } from '@prisma/client'
 import BigNumber from 'bignumber.js'
 import { Context } from 'blockchain/network'
 import { checkMultipleVaultsFromApi$ } from 'features/shared/vaultApi'
+import { IContext } from 'interfaces/blockchain/IContext'
 import { IProxy } from 'interfaces/blockchain/IProxy'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import { isEqual } from 'lodash'
@@ -136,12 +137,12 @@ export function createVault$(
   ilkData$: (ilk: string) => Observable<IlkData>,
   oracle: IOracle,
   ilkToToken$: (ilk: string) => Observable<string>,
-  context$: Observable<Context>,
+  context: IContext,
   id: BigNumber,
 ): Observable<Vault> {
   return vaultResolver$(id).pipe(
     switchMap(({ urnAddress, ilk, owner, type: makerType, controller }) =>
-      combineLatest(ilkToToken$(ilk), context$).pipe(
+      combineLatest(ilkToToken$(ilk), context.get$()).pipe(
         switchMap(([token, context]) => {
           return combineLatest(
             vatUrns$({ ilk, urnAddress }),

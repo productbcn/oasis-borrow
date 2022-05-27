@@ -303,10 +303,10 @@ function _setupAppContext(
 
   const tokenBalance$ = observe(onEveryBlock$, context$, tokenBalance)
   const balance$ = memoize(
-    curry(createBalance$)(onEveryBlock$, context$, tokenBalance$),
+    curry(createBalance$)(blocks, context, tokenBalance$),
     (token, address) => `${token}_${address}`,
   )
-  const ensName$ = memoize(curry(resolveENSName$)(context$), (address) => address)
+  const ensName$ = memoize(curry(resolveENSName$)(context), (address) => address)
 
   const tokenAllowance$ = observe(onEveryBlock$, context$, tokenAllowance)
   const tokenBalanceRawForJoin$ = observe(onEveryBlock$, context$, tokenBalanceRawForJoin)
@@ -314,9 +314,9 @@ function _setupAppContext(
   const tokenSymbol$ = observe(onEveryBlock$, context$, tokenSymbol)
   const tokenName$ = observe(onEveryBlock$, context$, tokenName)
 
-  const allowance$ = curry(createAllowance$)(context$, tokenAllowance$)
+  const allowance$ = curry(createAllowance$)(context, tokenAllowance$)
 
-  const ilkToToken$ = curry(createIlkToToken$)(context$)
+  const ilkToToken$ = curry(createIlkToToken$)(context)
 
   const ilkData$ = memoize(
     curry(createIlkData$)(vatIlks$, spotIlks$, jugIlks$, dogIlks$, ilkToToken$),
@@ -375,7 +375,7 @@ function _setupAppContext(
 
   const vault$ = memoize(
     (id: BigNumber) =>
-      createVault$(urnResolver$, vatUrns$, vatGem$, ilkData$, oracle, ilkToToken$, context$, id),
+      createVault$(urnResolver$, vatUrns$, vatGem$, ilkData$, oracle, ilkToToken$, context, id),
     bigNumberTostring,
   )
 
@@ -387,12 +387,12 @@ function _setupAppContext(
       ilkData$,
       oracle,
       ilkToToken$,
-      context$,
+      context,
       charter,
     ),
   )
 
-  const vaultHistory$ = memoize(curry(createVaultHistory$)(context$, onEveryBlock$, vault$))
+  const vaultHistory$ = memoize(curry(createVaultHistory$)(context, blocks, vault$))
 
   pluginDevModeHelpers(txHelpers$, connectedContext$, proxy)
 

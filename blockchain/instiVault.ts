@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js'
+import { IContext } from 'interfaces/blockchain/IContext'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import moment from 'moment'
 import { combineLatest, Observable, of } from 'rxjs'
@@ -30,7 +31,7 @@ export function createInstiVault$(
   ilkData$: (ilk: string) => Observable<IlkData>,
   oracle: IOracle,
   ilkToToken$: (ilk: string) => Observable<string>,
-  context$: Observable<Context>,
+  context: IContext,
 
   charter: {
     nib$: CharterStreamFactory
@@ -44,7 +45,7 @@ export function createInstiVault$(
     switchMap(({ urnAddress, ilk, owner, type: makerType, controller }) =>
       combineLatest(
         ilkToToken$(ilk),
-        context$,
+        context.get$(),
         charter.nib$({ ilk, usr: owner }),
         charter.peace$({ ilk, usr: owner }),
         charter.uline$({ ilk, usr: owner }),

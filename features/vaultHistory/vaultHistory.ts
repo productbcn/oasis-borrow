@@ -2,6 +2,8 @@ import BigNumber from 'bignumber.js'
 import { Context } from 'blockchain/network'
 import { Vault } from 'blockchain/vaults'
 import { gql, GraphQLClient } from 'graphql-request'
+import { IBlocks } from 'interfaces/blockchain/IBlocks'
+import { IContext } from 'interfaces/blockchain/IContext'
 import { memoize } from 'lodash'
 import flatten from 'lodash/flatten'
 import pickBy from 'lodash/pickBy'
@@ -244,17 +246,17 @@ function addReclaimFlag(events: VaultHistoryEvent[]) {
 }
 
 export function createVaultHistory$(
-  context$: Observable<Context>,
-  onEveryBlock$: Observable<number>,
+  context: IContext,
+  blocks: IBlocks,
   vault$: (id: BigNumber) => Observable<Vault>,
   vaultId: BigNumber,
 ): Observable<VaultHistoryEvent[]> {
   const makeClient = memoize(
     (url: string) => new GraphQLClient(url, { fetch: fetchWithOperationId }),
   )
-  return combineLatest(context$, vault$(vaultId)).pipe(
+  return combineLatest(context.get$(), vault$(vaultId)).pipe(
     switchMap(([{ etherscan, cacheApi, ethtx }, { token, address, id }]) => {
-      return onEveryBlock$.pipe(
+      return blocks.get$().pipe(
         switchMap(() => {
           const apiClient = makeClient(cacheApi)
 

@@ -1,5 +1,7 @@
 import { amountFromWei } from '@oasisdex/utils'
 import BigNumber from 'bignumber.js'
+import { IBlocks } from 'interfaces/blockchain/IBlocks'
+import { IContext } from 'interfaces/blockchain/IContext'
 import { IOracle } from 'interfaces/protocols/IOracle'
 import { bindNodeCallback, combineLatest, Observable, of } from 'rxjs'
 import { distinctUntilChanged, map, shareReplay, switchMap } from 'rxjs/operators'
@@ -9,16 +11,16 @@ import { CallObservable } from './calls/observe'
 import { Context } from './network'
 
 export function createBalance$(
-  onEveryBlock$: Observable<number>,
-  context$: Observable<Context>,
+  blocks: IBlocks,
+  context: IContext,
   tokenBalance$: CallObservable<typeof tokenBalance>,
   token: string,
   address: string,
 ) {
-  return context$.pipe(
+  return context.get$().pipe(
     switchMap(({ web3 }) => {
       if (token === 'ETH') {
-        return onEveryBlock$.pipe(
+        return blocks.get$().pipe(
           switchMap(() => bindNodeCallback(web3.eth.getBalance)(address)),
           map((ethBalance: string) => amountFromWei(new BigNumber(ethBalance))),
           distinctUntilChanged((x: BigNumber, y: BigNumber) => x.eq(y)),
@@ -73,13 +75,14 @@ export function createAccountBalance$(
 }
 
 export function createAllowance$(
-  context$: Observable<Context>,
+  // context$: Observable<Context>,
+  context: IContext,
   tokenAllowance$: CallObservable<typeof tokenAllowance>,
   token: string,
   owner: string,
   spender: string,
 ) {
-  return context$.pipe(
+  return context.get$().pipe(
     switchMap(() => {
       if (token === 'ETH') return of(maxUint256)
       return tokenAllowance$({ token, owner, spender })
