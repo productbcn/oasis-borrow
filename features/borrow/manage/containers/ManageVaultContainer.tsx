@@ -4,6 +4,7 @@ import { DefaultVaultHeader } from 'components/vault/DefaultVaultHeader'
 import { VaultChangesInformationEstimatedGasFee } from 'components/vault/VaultChangesInformation'
 import { VaultViewMode } from 'components/VaultTabSwitch'
 import { TAB_CHANGE_SUBJECT } from 'features/automation/protection/common/UITypes/TabChange'
+import { SidebarManageBorrowVault } from 'features/borrow/manage/sidebars/SidebarManageBorrowVault'
 import { VaultHistoryView } from 'features/vaultHistory/VaultHistoryView'
 import { useTranslation } from 'next-i18next'
 import React, { useEffect } from 'react'
@@ -29,6 +30,7 @@ export function ManageVaultContainer({
   } = manageVault
   const { t } = useTranslation()
   const stopLossReadEnabled = useFeatureToggle('StopLossRead')
+  const newComponentsEnabled = useFeatureToggle('NewComponents')
 
   useEffect(() => {
     const subscription = createManageVaultAnalytics$(
@@ -68,10 +70,14 @@ export function ManageVaultContainer({
           {!stopLossReadEnabled && <VaultHistoryView vaultHistory={manageVault.vaultHistory} />}
         </Grid>
         <Box>
-          <ManageVaultForm
-            {...manageVault}
-            txnCostDisplay={<VaultChangesInformationEstimatedGasFee {...manageVault} />}
-          />
+          {newComponentsEnabled ? (
+            <SidebarManageBorrowVault {...manageVault} />
+          ) : (
+            <ManageVaultForm
+              {...manageVault}
+              txnCostDisplay={<VaultChangesInformationEstimatedGasFee {...manageVault} />}
+            />
+          )}
         </Box>
       </Grid>
     </>
